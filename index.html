@@ -92,7 +92,11 @@ a:focus-visible,button:focus-visible,.solta:focus-within{outline:2px solid var(-
 .busca svg{position:absolute;left:12px;top:11px;color:var(--mut)}
 .busca input{margin:0;padding-left:42px}
 .tabela{padding:0;overflow:hidden}
-.lin{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"cli compras" "meta taxa";gap:2px 12px;padding:14px 16px;border-top:1px solid var(--bd);color:inherit;text-decoration:none}
+.lin{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto 44px;grid-template-areas:"cli compras del" "meta taxa del";gap:2px 10px;padding:14px 8px 14px 16px;border-top:1px solid var(--bd)}
+.abre{display:block;color:inherit;text-decoration:none}
+.abre::after{content:"";position:absolute;inset:0}
+.c-del{grid-area:del;align-self:center;position:relative;z-index:1}
+.c-del:hover{background:var(--per-t);color:var(--per)}
 .lin:first-child{border-top:0}
 .lin.cab{display:none}
 .c-cli{grid-area:cli;min-width:0}
@@ -105,8 +109,13 @@ a:focus-visible,button:focus-visible,.solta:focus-within{outline:2px solid var(-
   .stats{grid-template-columns:1.3fr 1fr 1fr}
   .stats div,.stats div:first-child{grid-column:auto;border-top:0;border-left:1px solid var(--bd)}
   .stats div:first-child{border-left:0}
-  .lin{grid-template-columns:minmax(0,2fr) 104px 84px 128px 128px 150px;grid-template-areas:none;align-items:center;gap:12px;padding:12px 18px}
-  a.lin:hover{background:var(--bg)}
+}
+@media (min-width:1200px){
+  .so-lin{display:none}
+  .lin{grid-template-columns:minmax(0,2fr) 104px 84px 128px 128px 110px 44px;grid-template-areas:none;align-items:center;gap:12px;padding:8px 10px 8px 18px}
+  .lin:not(.cab):hover{background:var(--bg)}
+  .lin.cab{padding:12px 10px 12px 18px}
+  .c-del{grid-column:7}
   .lin>*,.c-meta>*{grid-area:auto;grid-row:1}
   .c-meta{display:contents}
   .c-cli{grid-column:1}.c-data{grid-column:2}.c-notas{grid-column:3}.c-compras{grid-column:4}.c-taxa{grid-column:5}.c-st{grid-column:6}
@@ -133,6 +142,8 @@ a:focus-visible,button:focus-visible,.solta:focus-within{outline:2px solid var(-
 .barra strong{font-size:20px}
 .barra .btn{min-height:48px;padding:10px 22px}
 @media (min-width:900px){
+  .ed-exc{display:inline-flex;align-items:center;gap:8px;width:auto;padding:0 12px;font:inherit;font-weight:600}
+  .ed-exc:hover{background:var(--per-t);color:var(--per)}
   .ed-topo{position:static;margin:0 0 20px;padding:0}
   .ed-topo h1{font-size:28px}
   .barra{display:none}
@@ -249,7 +260,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
     <a class="novo" href="#/novo"><svg class="i"><use href="#i-mais"/></svg>Novo pedido</a>
     <a class="it p" href="#/pedidos" data-nav="pedidos"><svg class="i"><use href="#i-lista"/></svg>Pedidos</a>
     <a class="it a" href="#/ajustes" data-nav="ajustes"><svg class="i"><use href="#i-ajustes"/></svg>Ajustes</a>
-    <small class="versao">Versão 2.1</small>
+    <small class="versao">Versão 2.2</small>
   </nav>
 
   <main class="conteudo">
@@ -277,7 +288,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
           <h1 id="ed-titulo">Novo pedido</h1>
           <div class="sub"><i class="chip" id="ed-chip">Rascunho</i><small id="ed-salvo"></small></div>
         </div>
-        <button class="ic" id="ed-excluir" type="button" aria-label="Excluir pedido"><svg class="i"><use href="#i-lixo"/></svg></button>
+        <button class="ic ed-exc" id="ed-excluir" type="button" aria-label="Excluir pedido"><svg class="i"><use href="#i-lixo"/></svg><span class="so-desk">Excluir pedido</span></button>
       </header>
 
       <div class="ed-grid">
@@ -379,7 +390,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
           <label style="margin:0">Modelo<select id="c-model"></select></label>
         </section>
       </div>
-      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 2.1</small></p>
+      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 2.2</small></p>
     </section>
   </main>
 </div>
@@ -657,16 +668,27 @@ function renderLista() {
   $('#lista').innerHTML = '<div class="lin cab"><span class="c-cli">Cliente</span><span class="c-meta"><span class="c-data">Data</span><span class="c-notas">Notas</span><span class="c-st">Situação</span></span><span class="c-compras">Compras</span><span class="c-taxa">Serviço</span></div>' +
     l.map(p => {
       const t = p.tot || {compras: 0, taxa: 0};
-      return '<a class="lin" href="#/pedido/' + p.id + '">' +
-        '<span class="c-cli"><b>' + esc(p.cliente || 'Sem nome') + '</b><small>' + esc(p.cidade) + '</small></span>' +
-        '<span class="c-meta"><span class="c-data">' + dataBR(p.criado) + '</span>' + (p.cidade ? '<span class="so-mob">' + esc(p.cidade) + '</span>' : '') +
+      return '<div class="lin">' +
+        '<span class="c-cli"><a class="abre" href="#/pedido/' + p.id + '"><b>' + esc(p.cliente || 'Sem nome') + '</b></a><small>' + esc(p.cidade) + '</small></span>' +
+        '<span class="c-meta"><span class="c-data">' + dataBR(p.criado) + '</span>' + (p.cidade ? '<span class="so-lin">' + esc(p.cidade) + '</span>' : '') +
         '<span class="c-notas">' + pl(p.notas.length, 'nota', 'notas') + '</span>' +
         '<span class="c-st"><i class="chip' + (p.enviadoEm ? ' env">Enviado' : '">Rascunho') + '</i></span></span>' +
         '<span class="c-compras">' + money(t.compras) + '</span>' +
-        '<span class="c-taxa"><span class="so-mob">serviço </span>' + money(t.taxa) + '</span></a>';
+        '<span class="c-taxa"><span class="so-lin">serviço </span>' + money(t.taxa) + '</span>' +
+        '<button class="ic c-del" type="button" data-del="' + p.id + '" aria-label="Excluir pedido de ' + esc(p.cliente || 'cliente sem nome') + '"><svg class="i"><use href="#i-lixo"/></svg></button></div>';
     }).join('');
 }
 $('#busca').addEventListener('input', renderLista);
+async function excluirPedido(id, notas) {
+  lista = lista.filter(x => x.id !== id);
+  try { await DB.del('pedidos', id); for (const n of notas || []) await DB.del('fotos', n.id); } catch (e) {}
+}
+$('#lista').addEventListener('click', async e => {
+  const b = e.target.closest('[data-del]'); if (!b) return;
+  const p = lista.find(x => x.id === b.dataset.del); if (!p) return;
+  if (!confirm('Excluir o pedido de ' + (p.cliente || 'cliente sem nome') + ', de ' + dataBR(p.criado) + '? As notas e fotos dele serão apagadas deste aparelho.')) return;
+  await excluirPedido(p.id, p.notas); renderLista(); toast('Pedido excluído.');
+});
 $('#csv').addEventListener('click', () => {
   const c = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   const rows = [['Data do pedido', 'Cliente', 'Cidade', 'Situação', 'Loja', 'Nota', 'Data da nota', 'Descrição', 'Qtd', 'Valor unitário', 'Valor total', 'Frete do pedido', 'Serviço do pedido'].map(c).join(';')];
@@ -842,8 +864,7 @@ $('#taxainfo').addEventListener('click', e => { if (e.target.id === 'taxaauto') 
 $('#ed-excluir').addEventListener('click', async () => {
   if (!confirm('Excluir este pedido? As notas e fotos dele serão apagadas deste aparelho.')) return;
   const p = ped; p._apagado = true; clearTimeout(salvarT); ped = null;
-  lista = lista.filter(x => x.id !== p.id);
-  try { await DB.del('pedidos', p.id); for (const n of p.notas) await DB.del('fotos', n.id); } catch (e) {}
+  await excluirPedido(p.id, p.notas);
   location.hash = '#/pedidos'; toast('Pedido excluído.');
 });
 
