@@ -3,222 +3,396 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#22308F">
-<title>Nota Pronta</title>
+<meta name="theme-color" content="#F3F5F4">
+<title>Mulher que dorme em casa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
-  --bg:#E7EBF4; --paper:#fff; --ink:#161A33; --blue:#22308F; --blue-d:#18236B;
-  --mute:#5F6785; --line:#D3D9E8; --mark:#FFE14D; --pink:#F7D3DF; --danger:#B3261E;
+  --bg:#F3F5F4; --sup:#FFFFFF; --tx:#16201C; --mut:#5E6B66; --bd:#DDE3E0;
+  --pri:#0E7C66; --pri-d:#0A6252; --pri-t:#E3F3EE;
+  --amb:#6E4B00; --amb-t:#FFF3D1; --per:#B93227; --per-t:#FCE9E7;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
-.topo{background:var(--blue);color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 18px 14px}
-.topo h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
-.topo p{margin:2px 0 0;font-size:14px;opacity:.85}
-main{max-width:600px;margin:0 auto;padding:14px 12px}
-.bloco{background:var(--paper);border-radius:14px;padding:16px;margin-bottom:14px}
-h2{margin:0 0 12px;font-size:18px;font-weight:700;letter-spacing:-.01em}
-label{display:block;font-size:14px;font-weight:500;color:var(--mute);margin-bottom:10px}
-input,textarea,select{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:16px}
-textarea{min-height:64px;resize:vertical}
-input:focus,textarea:focus,select:focus,button:focus-visible,.btn:focus-within{outline:3px solid var(--mark);outline-offset:1px;border-color:var(--blue)}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 16px;border:1.5px solid var(--blue);border-radius:10px;background:#fff;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;text-align:center;margin:0}
-.btn.pri{background:var(--blue);color:#fff}
-.btn.pri:active{background:var(--blue-d)}
-.btn[disabled]{opacity:.5}
-.acoes{display:grid;gap:10px}
-.acoes.duas{grid-template-columns:1fr 1fr}
-.link{background:none;border:0;padding:8px 0;color:var(--blue);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}
-.link.perigo{color:var(--danger)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 "Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+h1{font-size:26px;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.02em}
+h2{font-size:17px;margin:0 0 14px;font-weight:600}
+small{font-size:13px;color:var(--mut)}
+a{color:var(--pri)}
+[hidden]{display:none!important}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-small,.dica{display:block;font-size:13px;color:var(--mute);font-weight:400}
-.aviso{background:var(--pink);border-radius:8px;padding:10px 12px;font-size:14px;margin:12px 0 0}
+svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-/* nota */
-.nota{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
-.nota header{display:flex;gap:10px;align-items:flex-start}
-.thumb{flex:none;width:64px;height:84px;padding:0;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg);cursor:zoom-in}
+/* campos e botões */
+label{display:block;font-size:14px;font-weight:500;color:var(--mut)}
+input,textarea,select{display:block;width:100%;min-height:44px;margin-top:4px;padding:9px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--sup);color:var(--tx);font:inherit;font-size:16px}
+textarea{min-height:72px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--pri);box-shadow:0 0 0 3px var(--pri-t)}
+a:focus-visible,button:focus-visible,.solta:focus-within{outline:2px solid var(--pri);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:9px 16px;border:1px solid var(--bd);border-radius:10px;background:var(--sup);color:var(--tx);font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--mut)}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+.btn.pri:hover{background:var(--pri-d);border-color:var(--pri-d)}
+.btn[disabled]{opacity:.5;cursor:default}
+.ic{display:inline-grid;place-items:center;width:44px;height:44px;flex:none;border:0;border-radius:10px;background:none;color:var(--mut);cursor:pointer}
+.ic:hover{background:var(--bd);color:var(--tx)}
+.link{background:none;border:0;padding:0;color:var(--pri);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}
+.card{background:var(--sup);border:1px solid var(--bd);border-radius:12px;padding:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pilha{display:grid;gap:16px}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--bd);color:var(--tx);font-size:12px;font-weight:600;font-style:normal;white-space:nowrap}
+.chip.env{background:var(--pri-t);color:var(--pri-d)}
+.aviso{background:var(--amb-t);color:var(--amb);border-radius:10px;padding:10px 12px;font-size:14px;margin:12px 0 0}
+.vazio{color:var(--mut);margin:0;padding:28px 16px;text-align:center}
+
+/* estrutura e navegação */
+.conteudo{width:100%;max-width:1180px;margin:0 auto;padding:20px 16px calc(104px + env(safe-area-inset-bottom,0px))}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--sup);border-top:1px solid var(--bd);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+.nav .marca,.nav .versao{display:none}
+.nav .it{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px;border-radius:10px;color:var(--mut);font-size:12px;font-weight:600;text-decoration:none}
+.nav .it[aria-current]{color:var(--pri)}
+.nav .it.p{order:1}.nav .novo{order:2}.nav .it.a{order:3}
+.nav .novo{display:flex;align-items:center;gap:8px;margin:0 6px;padding:12px 20px;border-radius:999px;background:var(--pri);color:#fff;font-weight:600;text-decoration:none}
+.marca-mob{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:15px;font-weight:700;color:var(--pri-d)}
+.marca-mob svg{width:20px;height:20px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+
+@media (max-width:899.98px){
+  body[data-tela=editor] .nav{display:none}
+  .so-desk{display:none!important}
+}
+@media (min-width:900px){
+  .app{display:grid;grid-template-columns:236px minmax(0,1fr)}
+  .nav{position:sticky;top:0;bottom:auto;height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:22px 14px;border-top:0;border-right:1px solid var(--bd)}
+  .nav .marca{display:flex;align-items:center;gap:10px;order:0;margin:0 6px 18px;font-size:16px;line-height:1.2;font-weight:700;letter-spacing:-.01em}
+  .nav .marca svg{color:var(--pri);width:26px;height:26px}
+  .nav .novo{order:1;justify-content:center;margin:0 0 14px;border-radius:10px;padding:11px 16px}
+  .nav .novo:hover{background:var(--pri-d)}
+  .nav .it{order:2;flex-direction:row;gap:10px;padding:10px 12px;font-size:15px}
+  .nav .it:hover{background:var(--bg)}
+  .nav .it[aria-current]{background:var(--pri-t);color:var(--pri-d)}
+  .nav .versao{display:block;order:9;margin:auto 6px 0}
+  .conteudo{padding:32px 32px 56px}
+  .so-mob{display:none!important}
+  h1{font-size:30px}
+}
+
+/* lista de pedidos */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:16px;padding:0;overflow:hidden}
+.stats div{padding:14px 18px;border-top:1px solid var(--bd)}
+.stats div:first-child{grid-column:1/-1;border-top:0}
+.stats div:last-child{border-left:1px solid var(--bd)}
+.stats b{display:block;font-size:20px;font-weight:700}
+.stats div:first-child b{font-size:28px;color:var(--pri-d);letter-spacing:-.01em}
+.ferr{display:flex;gap:10px;margin-bottom:12px}
+.busca{position:relative;flex:1}
+.busca svg{position:absolute;left:12px;top:11px;color:var(--mut)}
+.busca input{margin:0;padding-left:42px}
+.tabela{padding:0;overflow:hidden}
+.lin{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"cli compras" "meta taxa";gap:2px 12px;padding:14px 16px;border-top:1px solid var(--bd);color:inherit;text-decoration:none}
+.lin:first-child{border-top:0}
+.lin.cab{display:none}
+.c-cli{grid-area:cli;min-width:0}
+.c-cli b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.c-cli small{display:none}
+.c-meta{grid-area:meta;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:13px;color:var(--mut)}
+.c-compras{grid-area:compras;text-align:right;font-weight:600}
+.c-taxa{grid-area:taxa;text-align:right;font-size:13px;color:var(--mut)}
+@media (min-width:900px){
+  .stats{grid-template-columns:1.3fr 1fr 1fr}
+  .stats div,.stats div:first-child{grid-column:auto;border-top:0;border-left:1px solid var(--bd)}
+  .stats div:first-child{border-left:0}
+  .lin{grid-template-columns:minmax(0,2fr) 104px 84px 128px 128px 150px;grid-template-areas:none;align-items:center;gap:12px;padding:12px 18px}
+  a.lin:hover{background:var(--bg)}
+  .lin>*,.c-meta>*{grid-area:auto;grid-row:1}
+  .c-meta{display:contents}
+  .c-cli{grid-column:1}.c-data{grid-column:2}.c-notas{grid-column:3}.c-compras{grid-column:4}.c-taxa{grid-column:5}.c-st{grid-column:6}
+  .c-data,.c-notas{font-size:15px;color:var(--tx)}
+  .c-cli small{display:block}
+  .c-taxa{font-size:inherit;color:inherit}
+  .lin.cab{display:grid;font-size:13px;color:var(--mut);font-weight:600;background:var(--bg);border-bottom:1px solid var(--bd)}
+  .lin.cab+.lin{border-top:0}
+  .lin.cab .c-compras,.lin.cab .c-taxa,.lin.cab .c-data,.lin.cab .c-notas{font-size:13px;font-weight:600;color:var(--mut)}
+}
+
+/* editor */
+.ed-topo{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;margin:-20px -16px 12px;padding:calc(10px + env(safe-area-inset-top,0px)) 8px 10px;background:var(--bg)}
+.ed-topo .tit{flex:1;min-width:0}
+.ed-topo h1{font-size:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed-topo .sub{display:flex;align-items:center;gap:8px;margin-top:3px}
+.ed-grid{display:grid;gap:16px}
+.ed-lado{min-width:0}
+.envio{display:none;gap:10px;margin-top:24px}
+.envio .duas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.envio .btn{padding:9px 10px;white-space:nowrap}
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--sup);border-top:1px solid var(--bd);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.barra small{display:block}
+.barra strong{font-size:20px}
+.barra .btn{min-height:48px;padding:10px 22px}
+@media (min-width:900px){
+  .ed-topo{position:static;margin:0 0 20px;padding:0}
+  .ed-topo h1{font-size:28px}
+  .barra{display:none}
+  .envio{display:grid}
+}
+@media (min-width:1140px){
+  .ed-grid{grid-template-columns:minmax(0,1fr) 340px;align-items:start;gap:20px}
+  .ed-lado{position:sticky;top:24px}
+}
+
+/* notas */
+.solta{display:flex;flex-direction:column;align-items:center;gap:4px;padding:20px 16px;border:1.5px dashed var(--pri);border-radius:12px;background:var(--pri-t);color:var(--pri-d);text-align:center;cursor:pointer}
+.solta b{font-size:16px;font-weight:600;color:var(--pri-d)}
+.solta span{font-size:13px;font-weight:400;color:var(--tx)}
+.solta svg{width:28px;height:28px}
+.solta.sobre{background:var(--sup);border-style:solid}
+.mouse{display:none}
+@media (hover:hover) and (pointer:fine){.mouse{display:inline}.toque{display:none}}
+.nota{container-type:inline-size;border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.n-cab{display:grid;grid-template-columns:44px minmax(0,.62fr) minmax(0,1fr);gap:8px 10px;align-items:start}
+.n-cab input{margin:0}
+.n-cab [data-nf=numero]{grid-column:1/3}
+.thumb{width:44px;height:44px;padding:0;border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:var(--bg);cursor:zoom-in}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.cab{flex:1;min-width:0}
-.cab input{margin:0 0 8px}
-.lendo{margin:10px 0;padding:10px 12px;border-radius:8px;background:var(--bg);font-size:14px;font-weight:500}
-.lendo::before{content:"";display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid var(--blue);border-top-color:transparent;border-radius:50%;vertical-align:-1px;animation:gira .8s linear infinite}
+.n-cab .f-loja{grid-column:2/4}
+.n-cab.semfoto{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.n-cab.semfoto .f-loja{grid-column:1/3}
+.n-cab.semfoto [data-nf=numero]{grid-column:auto}
+.lendo{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--pri-t);color:var(--pri-d);font-size:14px;font-weight:500}
+.lendo::before{content:"";display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid var(--pri);border-top-color:transparent;border-radius:50%;vertical-align:-1px;animation:gira .8s linear infinite}
 @keyframes gira{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.lendo::before{animation:none}}
-.erro{margin:10px 0;padding:10px 12px;border-radius:8px;background:#FBE3E1;color:#7A1812;font-size:14px}
-.item{padding:10px 0;border-top:1px dashed var(--line)}
+.erro{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--per-t);color:#7A1F17;font-size:14px}
+.itens{margin-top:12px}
+.itens-cab{display:none}
+.item{display:grid;grid-template-columns:1fr 1.3fr 1.3fr 44px;grid-template-areas:"d d d x" "q u t t";gap:8px;padding:12px 0;border-top:1px solid var(--bd)}
+.item label{font-size:12px}
 .item input{margin-top:2px}
-.nums{display:grid;grid-template-columns:.8fr 1.1fr 1.1fr 40px;gap:8px;align-items:end;margin-top:6px}
-.nums label{margin:0;font-size:12px}
-.nums input{padding:8px;text-align:right}
-.del{height:42px;border:0;border-radius:8px;background:var(--bg);color:var(--mute);font-size:20px;cursor:pointer}
-.rod{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-top:1.5px solid var(--line);padding-top:10px;margin-top:4px}
-.rod label{margin:0;width:120px}
-.rod div{text-align:right;font-size:14px;color:var(--mute)}
-.rod strong{display:block;font-size:19px;color:var(--ink)}
-.confira{margin:10px 0 0;padding:8px 12px;border-radius:8px;background:var(--mark);font-size:14px}
-.vazio{color:var(--mute);margin:0 0 12px}
+.f-d{grid-area:d}.f-q{grid-area:q}.f-u{grid-area:u}.f-t{grid-area:t}.item .del{grid-area:x;align-self:end}
+.f-q input,.f-u input,.f-t input{text-align:right}
+@container (min-width:470px){
+  .n-cab{grid-template-columns:44px minmax(0,2fr) minmax(0,1fr) 150px}
+  .n-cab.semfoto{grid-template-columns:minmax(0,2fr) minmax(0,1fr) 150px}
+  .n-cab .f-loja,.n-cab.semfoto .f-loja,.n-cab [data-nf=numero]{grid-column:auto}
+  .itens-cab,.item{grid-template-columns:minmax(0,1fr) 62px 98px 98px 44px;grid-template-areas:"d q u t x";gap:8px}
+  .itens-cab{display:grid;padding:0 0 6px;font-size:12px;font-weight:600;color:var(--mut)}
+  .itens-cab span:nth-child(n+2){text-align:right;padding-right:12px}
+  .item{padding:4px 0;border-top:0}
+  .item label span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .item input{margin:0}
+}
+.n-rod{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-top:1px solid var(--bd);padding-top:12px;margin-top:10px}
+.n-rod label{width:124px}
+.n-rod div{text-align:right;font-size:13px;color:var(--mut)}
+.n-rod strong{display:block;font-size:19px;color:var(--tx)}
+.confira{margin:12px 0 0;padding:8px 12px;border-radius:10px;background:var(--amb-t);color:var(--amb);font-size:14px}
+.n-acoes{display:flex;justify-content:space-between;margin-top:12px}
+.link.perigo{color:var(--per)}
 
-/* recibo */
-.recibo{position:relative;background:var(--paper);padding:18px 16px 22px;margin-bottom:26px;border-radius:14px 14px 0 0}
+/* resumo */
+.recibo{position:relative;background:var(--sup);border:1px solid var(--bd);border-bottom:0;border-radius:12px 12px 0 0;padding:18px 18px 22px}
 .recibo::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:16px;background:radial-gradient(circle at 8px 8px,var(--bg) 5.5px,transparent 6px) 0 0/16px 16px repeat-x}
 .recibo dl{margin:0}
-.recibo dl div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
-.recibo dt{color:var(--mute)}
+.recibo dl div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--bd)}
+.recibo dt{color:var(--mut)}
 .recibo dd{margin:0;font-weight:600}
-.recibo .pagar{border-bottom:0;padding-top:12px;align-items:center}
-.recibo .pagar dt{color:var(--ink);font-weight:700;font-size:17px}
-.recibo mark{background:var(--mark);color:var(--ink);padding:3px 8px;border-radius:4px;font-size:24px;font-weight:700}
-.recibo .geral{border-bottom:0;font-size:14px}
+.recibo .pagar{border-bottom:0;padding-top:14px;align-items:baseline}
+.recibo .pagar dt{color:var(--tx);font-weight:600}
+.recibo .pagar dd{font-size:26px;font-weight:700;color:var(--pri-d);letter-spacing:-.01em}
+.recibo .geral{border-bottom:0;padding:0;font-size:13px}
+.recibo .geral dd{font-weight:500;color:var(--mut)}
 
-/* histórico */
-.mes{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
-.mes strong{font-size:24px}
-.ped{padding:12px 0;border-top:1px dashed var(--line);display:flex;justify-content:space-between;gap:10px}
-.ped b{display:block}
-.ped span{font-size:14px;color:var(--mute)}
-.ped .v{text-align:right;white-space:nowrap}
-
-/* navegação */
-nav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border-top:1.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
-nav button{min-height:60px;border:0;background:none;color:var(--mute);font:inherit;font-weight:600;cursor:pointer;border-top:3px solid transparent;margin-top:-1.5px}
-nav button[aria-current=page]{color:var(--blue);border-top-color:var(--blue)}
-#toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:90%;background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:15px;z-index:9;opacity:0;pointer-events:none;transition:opacity .2s}
+/* folha de envio, zoom, toast */
+dialog{border:0;padding:0;color:var(--tx)}
+dialog::backdrop{background:rgba(22,32,28,.55)}
+.folha{width:100%;max-width:520px;margin:auto auto 0;border-radius:18px 18px 0 0;background:var(--sup);padding:20px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.folha h2{font-size:19px;margin-bottom:14px}
+.opc{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;align-items:center;width:100%;margin-bottom:10px;padding:14px;border:1px solid var(--bd);border-radius:12px;background:var(--sup);color:var(--tx);font:inherit;text-align:left;cursor:pointer}
+.opc svg{grid-row:1/3;color:var(--pri)}
+.opc b{font-weight:600}
+.opc small{grid-column:2}
+.opc.dest{border-color:var(--pri);background:var(--pri-t)}
+.folha .btn{width:100%}
+#zoom{max-width:96vw;max-height:92vh;border-radius:10px;background:#000}
+#zoom img{display:block;max-width:96vw;max-height:92vh}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:max-content;max-width:min(92vw,440px);background:var(--tx);color:#fff;padding:10px 16px;border-radius:10px;font-size:15px;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
-dialog{border:0;padding:0;max-width:96vw;max-height:92vh;border-radius:10px;background:#000}
-dialog img{display:block;max-width:96vw;max-height:92vh}
-dialog::backdrop{background:rgba(22,26,51,.8)}
-[hidden]{display:none!important}
+@media (min-width:900px){#toast{bottom:32px}}
+.aj-grid{display:grid;gap:16px}
+.aj-grid .card label{margin-bottom:12px}
+@media (min-width:1000px){.aj-grid{grid-template-columns:1fr 1fr;align-items:start}}
 </style>
 </head>
-<body>
-<div class="topo">
-  <h1>Nota Pronta</h1>
-  <p>Da foto da nota ao resumo para a cliente</p>
+<body data-tela="pedidos">
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-lista" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-mais" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-ajustes" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-voltar" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-lixo" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.5M8.2 13.2l7.6 4.5"/></symbol>
+  <symbol id="i-baixar" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-copiar" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-nota" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-planilha" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16"/></symbol>
+</svg>
+
+<div class="app">
+  <nav class="nav" aria-label="Principal">
+    <div class="marca"><svg class="i"><use href="#i-nota"/></svg><span>Mulher que dorme em casa</span></div>
+    <a class="novo" href="#/novo"><svg class="i"><use href="#i-mais"/></svg>Novo pedido</a>
+    <a class="it p" href="#/pedidos" data-nav="pedidos"><svg class="i"><use href="#i-lista"/></svg>Pedidos</a>
+    <a class="it a" href="#/ajustes" data-nav="ajustes"><svg class="i"><use href="#i-ajustes"/></svg>Ajustes</a>
+    <small class="versao">Versão 2.1</small>
+  </nav>
+
+  <main class="conteudo">
+    <!-- PEDIDOS -->
+    <section id="t-pedidos">
+      <p class="marca-mob so-mob"><svg class="i"><use href="#i-nota"/></svg>Mulher que dorme em casa</p>
+      <div class="topo"><h1>Pedidos</h1></div>
+      <div class="card stats">
+        <div><small id="s-mes">Serviço no mês</small><b id="s-taxa"></b></div>
+        <div><small>Compras no mês</small><b id="s-compras"></b></div>
+        <div><small>Pedidos enviados</small><b id="s-n"></b></div>
+      </div>
+      <div class="ferr">
+        <label class="busca"><span class="vh">Buscar pedido</span><svg class="i"><use href="#i-busca"/></svg><input id="busca" type="search" placeholder="Buscar cliente ou cidade" autocomplete="off"></label>
+        <button class="btn" id="csv" type="button" aria-label="Baixar planilha de todos os pedidos"><svg class="i"><use href="#i-planilha"/></svg><span class="so-desk">Baixar planilha</span></button>
+      </div>
+      <div class="card tabela" id="lista"></div>
+    </section>
+
+    <!-- EDITOR -->
+    <section id="t-editor" hidden>
+      <header class="ed-topo">
+        <a class="ic" href="#/pedidos" aria-label="Voltar para pedidos"><svg class="i"><use href="#i-voltar"/></svg></a>
+        <div class="tit">
+          <h1 id="ed-titulo">Novo pedido</h1>
+          <div class="sub"><i class="chip" id="ed-chip">Rascunho</i><small id="ed-salvo"></small></div>
+        </div>
+        <button class="ic" id="ed-excluir" type="button" aria-label="Excluir pedido"><svg class="i"><use href="#i-lixo"/></svg></button>
+      </header>
+
+      <div class="ed-grid">
+        <div class="pilha">
+          <section class="card">
+            <h2>Cliente</h2>
+            <div class="g2">
+              <label>Nome<input id="cliente" autocomplete="off"></label>
+              <label>Cidade<input id="cidade" autocomplete="off"></label>
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>Notas</h2>
+            <div id="notas"></div>
+            <label class="solta" id="solta">
+              <svg class="i"><use href="#i-camera"/></svg>
+              <b>Adicionar nota</b>
+              <span class="toque">Fotografe ou escolha da galeria</span>
+              <span class="mouse">Arraste a foto para cá, cole com Ctrl+V ou clique para escolher</span>
+              <input class="vh" type="file" id="arq" accept="image/*" multiple>
+            </label>
+            <p style="margin:12px 0 0;text-align:center"><button class="link" id="manual" type="button">Digitar uma nota sem foto</button></p>
+            <p class="aviso" id="semchave" hidden>As notas ainda não são lidas sozinhas. Cadastre a chave gratuita em <a href="#/ajustes">Ajustes</a> para ligar a leitura automática.</p>
+          </section>
+
+          <section class="card">
+            <h2>Frete e serviço</h2>
+            <div class="g2">
+              <label>Frete (R$)<input id="frete" inputmode="decimal" placeholder="0,00"></label>
+              <label>Serviço (R$)<input id="taxa" inputmode="decimal" placeholder="0,00"></label>
+            </div>
+            <small id="taxainfo" style="display:block;margin-top:8px"></small>
+            <label style="margin-top:14px">Observações para a cliente<textarea id="obs"></textarea></label>
+          </section>
+        </div>
+
+        <aside class="ed-lado">
+          <section class="recibo" aria-live="polite">
+            <h2>Resumo para a cliente</h2>
+            <dl>
+              <div><dt id="r-n">Compras</dt><dd id="r-compras"></dd></div>
+              <div><dt>Frete</dt><dd id="r-frete"></dd></div>
+              <div><dt>Serviço</dt><dd id="r-taxa"></dd></div>
+              <div class="pagar"><dt>Frete + serviço</dt><dd id="r-pagar"></dd></div>
+              <div class="geral"><dt>Total geral, com as compras</dt><dd id="r-geral"></dd></div>
+            </dl>
+          </section>
+          <div class="envio">
+            <button class="btn pri" type="button" data-env="share"><svg class="i"><use href="#i-share"/></svg>Compartilhar PDF</button>
+            <div class="duas">
+              <button class="btn" type="button" data-env="pdf"><svg class="i"><use href="#i-baixar"/></svg>Baixar PDF</button>
+              <button class="btn" type="button" data-env="txt"><svg class="i"><use href="#i-copiar"/></svg>Copiar texto</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="barra">
+        <div><small>Frete + serviço</small><strong id="b-pagar"></strong></div>
+        <button class="btn pri" id="b-enviar" type="button">Enviar resumo</button>
+      </div>
+    </section>
+
+    <!-- AJUSTES -->
+    <section id="t-ajustes" hidden>
+      <div class="topo"><h1>Ajustes</h1></div>
+      <div class="aj-grid">
+        <div class="pilha">
+          <section class="card">
+            <h2>Quanto você cobra</h2>
+            <div class="g2">
+              <label>Compras até (R$)<input id="c-limite" inputmode="decimal"></label>
+              <label>Valor fixo (R$)<input id="c-fixo" inputmode="decimal" placeholder="ex.: 50,00"></label>
+            </div>
+            <div class="g2">
+              <label>Acima disso (%)<input id="c-pct" inputmode="decimal" placeholder="ex.: 10"></label>
+              <label>A porcentagem vale
+                <select id="c-modo">
+                  <option value="total">sobre a compra toda</option>
+                  <option value="excedente">só sobre o que passar, mais o fixo</option>
+                </select>
+              </label>
+            </div>
+            <small id="c-exemplo"></small>
+          </section>
+          <section class="card">
+            <h2>O que aparece no resumo</h2>
+            <label>Seu nome ou nome do negócio<input id="c-negocio" autocomplete="off"></label>
+            <label style="margin:0">Chave Pix para receber frete e serviço<input id="c-pix" autocomplete="off"></label>
+          </section>
+        </div>
+        <section class="card">
+          <h2>Leitura automática das notas</h2>
+          <p style="margin:0 0 14px;font-size:14px;color:var(--mut)">A leitura usa o Gemini, do Google, na faixa gratuita. Crie uma chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> e cole aqui. Ela fica guardada só neste aparelho.</p>
+          <label>Chave do Gemini<input id="c-key" type="password" autocomplete="off" spellcheck="false"></label>
+          <button class="btn" id="c-testar" type="button">Testar chave</button>
+          <small id="c-status" style="display:block;margin:10px 0 14px" role="status"></small>
+          <label style="margin:0">Modelo<select id="c-model"></select></label>
+        </section>
+      </div>
+      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 2.1</small></p>
+    </section>
+  </main>
 </div>
 
-<main>
-<!-- PEDIDO -->
-<div id="v-pedido">
-  <section class="bloco">
-    <h2>Para quem é a compra</h2>
-    <div class="g2">
-      <label>Cliente<input id="cliente" autocomplete="off"></label>
-      <label>Cidade<input id="cidade" autocomplete="off"></label>
-    </div>
-  </section>
-
-  <section class="bloco">
-    <h2>Notas</h2>
-    <div id="notas"></div>
-    <div class="acoes">
-      <label class="btn pri">Fotografar ou escolher nota
-        <input class="vh" type="file" id="arq" accept="image/*" multiple>
-      </label>
-      <button class="btn" id="manual" type="button">Digitar uma nota sem foto</button>
-    </div>
-    <p class="aviso" id="semchave" hidden>As notas ainda não são lidas sozinhas. Para ligar a leitura automática, cadastre a chave gratuita em <button class="link" type="button" data-ir="cfg" style="padding:0">Ajustes</button>.</p>
-  </section>
-
-  <section class="bloco">
-    <h2>Frete e serviço</h2>
-    <div class="g2">
-      <label>Frete (R$)<input id="frete" inputmode="decimal" placeholder="0,00"></label>
-      <label>Serviço (R$)<input id="taxa" inputmode="decimal" placeholder="0,00"></label>
-    </div>
-    <small id="taxainfo"></small>
-    <label style="margin-top:12px">Observações para a cliente<textarea id="obs"></textarea></label>
-  </section>
-
-  <section class="recibo" aria-live="polite">
-    <h2>Resumo para a cliente</h2>
-    <dl>
-      <div><dt id="r-n">Compras</dt><dd id="r-compras"></dd></div>
-      <div><dt>Frete</dt><dd id="r-frete"></dd></div>
-      <div><dt>Serviço</dt><dd id="r-taxa"></dd></div>
-      <div class="pagar"><dt>Frete + serviço</dt><dd><mark id="r-pagar"></mark></dd></div>
-      <div class="geral"><dt>Total geral, com as compras</dt><dd id="r-geral"></dd></div>
-    </dl>
-  </section>
-
-  <div class="acoes">
-    <button class="btn pri" id="compartilhar" type="button">Compartilhar PDF</button>
-    <div class="acoes duas">
-      <button class="btn" id="baixar" type="button">Baixar PDF</button>
-      <button class="btn" id="copiar" type="button">Copiar resumo em texto</button>
-    </div>
-    <button class="btn" id="concluir" type="button">Salvar no histórico e começar outro</button>
-    <button class="link perigo" id="limpar" type="button">Descartar este pedido</button>
-  </div>
-</div>
-
-<!-- HISTÓRICO -->
-<div id="v-hist" hidden>
-  <section class="bloco">
-    <div class="mes"><h2 id="h-mes" style="margin:0"></h2><strong id="h-ganho"></strong></div>
-    <small id="h-sub"></small>
-  </section>
-  <section class="bloco">
-    <h2>Pedidos salvos</h2>
-    <div id="h-lista"></div>
-    <div class="acoes" style="margin-top:12px">
-      <button class="btn" id="csv" type="button">Baixar planilha (abre no Excel)</button>
-    </div>
-    <small style="margin-top:10px">O histórico fica guardado só neste aparelho, sem as fotos. Baixe a planilha de vez em quando para ter uma cópia.</small>
-  </section>
-</div>
-
-<!-- AJUSTES -->
-<div id="v-cfg" hidden>
-  <section class="bloco">
-    <h2>Quanto você cobra</h2>
-    <div class="g2">
-      <label>Compras até (R$)<input id="c-limite" inputmode="decimal"></label>
-      <label>Valor fixo (R$)<input id="c-fixo" inputmode="decimal" placeholder="ex.: 50,00"></label>
-    </div>
-    <div class="g2">
-      <label>Acima disso (%)<input id="c-pct" inputmode="decimal" placeholder="ex.: 10"></label>
-      <label>A porcentagem vale
-        <select id="c-modo">
-          <option value="total">sobre a compra toda</option>
-          <option value="excedente">só sobre o que passar, mais o fixo</option>
-        </select>
-      </label>
-    </div>
-    <small id="c-exemplo"></small>
-  </section>
-
-  <section class="bloco">
-    <h2>O que aparece no resumo</h2>
-    <label>Seu nome ou nome do negócio<input id="c-negocio" autocomplete="off"></label>
-    <label>Chave Pix para receber frete e serviço<input id="c-pix" autocomplete="off"></label>
-  </section>
-
-  <section class="bloco">
-    <h2>Leitura automática das notas</h2>
-    <p class="dica" style="margin:0 0 12px">A leitura usa o Gemini, do Google, na faixa gratuita. Crie uma chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>, copie e cole aqui. Ela fica guardada só neste aparelho.</p>
-    <label>Chave do Gemini<input id="c-key" type="password" autocomplete="off" spellcheck="false"></label>
-    <button class="btn" id="c-testar" type="button">Testar chave</button>
-    <small id="c-status" style="margin:8px 0 12px"></small>
-    <label>Modelo<select id="c-model"></select></label>
-  </section>
-  <small style="text-align:center">Versão 1.2</small>
-</div>
-</main>
-
-<nav>
-  <button type="button" data-ir="pedido" aria-current="page">Pedido</button>
-  <button type="button" data-ir="hist">Histórico</button>
-  <button type="button" data-ir="cfg">Ajustes</button>
-</nav>
-<div id="toast" role="status"></div>
+<dialog class="folha" id="folha" aria-labelledby="folha-t">
+  <h2 id="folha-t">Enviar resumo</h2>
+  <button class="opc dest" type="button" data-env="share"><svg class="i"><use href="#i-share"/></svg><b>Compartilhar PDF</b><small>Abre o WhatsApp ou outro app com o PDF anexado</small></button>
+  <button class="opc" type="button" data-env="pdf"><svg class="i"><use href="#i-baixar"/></svg><b>Baixar PDF</b><small>Salva o arquivo para anexar depois</small></button>
+  <button class="opc" type="button" data-env="txt"><svg class="i"><use href="#i-copiar"/></svg><b>Copiar resumo em texto</b><small>Para colar direto na conversa</small></button>
+  <button class="btn" type="button" id="folha-x">Cancelar</button>
+</dialog>
 <dialog id="zoom"><img alt="Foto da nota"></dialog>
+<div id="toast" role="status"></div>
 
 <script>
 /*PURO-INICIO*/
@@ -227,6 +401,7 @@ const money = v => 'R$ ' + nf.format(v || 0);
 const dec = v => (v == null || isNaN(v)) ? '' : nf.format(v);
 const qtd = v => (v == null || isNaN(v)) ? '' : String(Math.round(v * 1000) / 1000).replace('.', ',');
 const r2 = v => Math.round((v || 0) * 100) / 100;
+const pl = (n, um, varios) => n + ' ' + (n === 1 ? um : varios);
 
 function parseBR(s) {
   if (typeof s === 'number') return isNaN(s) ? null : s;
@@ -279,13 +454,13 @@ function resumoTexto(cfg, d, quando) {
 function buildPdf(JsPDF, cfg, d, quando) {
   const doc = new JsPDF({unit: 'mm', format: 'a4'});
   const W = 210, H = 297, M = 15, R = W - M;
-  const ink = [22, 26, 51], blue = [34, 48, 143], grey = [95, 103, 133], line = [211, 217, 232];
+  const ink = [22, 32, 28], cor = [10, 98, 82], grey = [94, 107, 102], line = [221, 227, 224];
   const t = totais(cfg, d);
   let y = M;
   const need = h => { if (y + h > H - M - 8) { doc.addPage(); y = M; } };
   const font = (st, sz, c) => { doc.setFont('helvetica', st); doc.setFontSize(sz); doc.setTextColor(...c); };
 
-  font('bold', 18, blue); doc.text(cfg.negocio || 'Resumo de compras', M, y + 6);
+  font('bold', 18, cor); doc.text(cfg.negocio || 'Resumo de compras', M, y + 6);
   font('normal', 10, grey); doc.text(dataBR(quando), R, y + 6, {align: 'right'});
   y += 12;
   if (cfg.negocio) { doc.text('Resumo de compras', M, y); y += 6; }
@@ -294,14 +469,14 @@ function buildPdf(JsPDF, cfg, d, quando) {
   y += 8;
 
   const rows = [
-    ['Compras (' + d.notas.length + (d.notas.length === 1 ? ' nota)' : ' notas)'), money(t.compras), 0],
+    ['Compras (' + pl(d.notas.length, 'nota', 'notas') + ')', money(t.compras), 0],
     ['Frete', money(t.frete), 0],
     ['Serviço', money(t.taxa), 0],
     ['Frete + serviço', money(t.pagar), 1],
     ['Total geral, com as compras', money(t.geral), 0]
   ];
   const bh = 6 + rows.length * 6.5;
-  doc.setFillColor(238, 241, 248); doc.roundedRect(M, y, W - 2 * M, bh, 2, 2, 'F');
+  doc.setFillColor(236, 244, 241); doc.roundedRect(M, y, W - 2 * M, bh, 2, 2, 'F');
   let ry = y + 7.5;
   rows.forEach(r => {
     font(r[2] ? 'bold' : 'normal', r[2] ? 12 : 10.5, ink);
@@ -319,7 +494,7 @@ function buildPdf(JsPDF, cfg, d, quando) {
   const cQ = M + 118, cU = M + 150;
   d.notas.forEach((n, k) => {
     need(26);
-    font('bold', 12.5, blue); doc.text(n.loja || 'Nota ' + (k + 1), M, y); y += 5;
+    font('bold', 12.5, cor); doc.text(n.loja || 'Nota ' + (k + 1), M, y); y += 5;
     const sub = [n.numero ? 'Nota ' + n.numero : '', dataBR(n.data), n.cnpj ? 'CNPJ ' + n.cnpj : ''].filter(Boolean).join('   ');
     if (sub) { font('normal', 9, grey); doc.text(sub, M, y); y += 5; }
     font('bold', 9, grey);
@@ -345,7 +520,7 @@ function buildPdf(JsPDF, cfg, d, quando) {
   d.notas.forEach((n, k) => {
     if (!n.img) return;
     doc.addPage();
-    font('bold', 11, blue); doc.text('Foto da nota: ' + (n.loja || 'Nota ' + (k + 1)), M, M + 2);
+    font('bold', 11, cor); doc.text('Foto da nota: ' + (n.loja || 'Nota ' + (k + 1)), M, M + 2);
     const mw = W - 2 * M, mh = H - 2 * M - 16, s = Math.min(mw / (n.w || 3), mh / (n.h || 4));
     const iw = (n.w || 3) * s, ih = (n.h || 4) * s;
     doc.addImage(n.img, 'JPEG', (W - iw) / 2, M + 7, iw, ih);
@@ -360,127 +535,229 @@ function buildPdf(JsPDF, cfg, d, quando) {
 }
 /*PURO-FIM*/
 
-// ---------- estado ----------
+// ---------- base ----------
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const LS = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 };
 const DB = {
+  _p: null,
   open() {
-    return new Promise((res, rej) => {
-      const r = indexedDB.open('notapronta', 1);
-      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    if (!this._p) this._p = new Promise((res, rej) => {
+      const r = indexedDB.open('notapronta', 2);
+      r.onupgradeneeded = () => { ['kv', 'pedidos', 'fotos'].forEach(s => { if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s); }); };
       r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
     });
+    return this._p;
   },
-  async get(k) {
-    try { const db = await this.open(); return await new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
-    catch (e) { return null; }
+  async tx(store, mode, fn) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(store, mode), q = fn(t.objectStore(store));
+      t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+    });
   },
-  async set(k, v) {
-    try { const db = await this.open(); await new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
-    catch (e) {}
-  }
+  get: (s, k) => DB.tx(s, 'readonly', o => o.get(k)),
+  all: s => DB.tx(s, 'readonly', o => o.getAll()),
+  put: (s, k, v) => DB.tx(s, 'readwrite', o => o.put(v, k)),
+  del: (s, k) => DB.tx(s, 'readwrite', o => o.delete(k))
 };
-const novoPedido = () => ({cliente: '', cidade: '', frete: null, taxaManual: null, obs: '', notas: []});
 const hojeISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const novoPedido = () => ({id: uid(), criado: hojeISO(), atualizado: Date.now(), enviadoEm: null, cliente: '', cidade: '', frete: null, taxaManual: null, obs: '', notas: []});
+const itemVazio = () => ({d: '', q: 1, u: null, t: null});
 
 let cfg = Object.assign({key: '', model: 'gemini-2.5-flash', modelos: [], limite: 1000, fixo: null, pct: null, modo: 'total', negocio: '', pix: ''}, LS.get('np-cfg', {}));
-let hist = LS.get('np-hist', []);
-let draft = novoPedido();
-let salvarT;
-const salvar = () => { clearTimeout(salvarT); salvarT = setTimeout(() => DB.set('draft', draft), 400); };
+let lista = [];      // todos os pedidos, sem as fotos
+let ped = null;      // pedido aberto no editor
+let pend = null;     // pedido novo, ainda não aberto
+let avisouDB = false;
 const salvarCfg = () => LS.set('np-cfg', cfg);
 
 let toastT;
-function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3800); }
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4000); }
+function falhaDB() { if (!avisouDB) { avisouDB = true; toast('Este navegador não deixou guardar os pedidos no aparelho. Baixe o PDF antes de fechar a página.'); } }
 
-// ---------- navegação ----------
-function ir(v) {
-  ['pedido', 'hist', 'cfg'].forEach(k => { $('#v-' + k).hidden = k !== v; });
-  document.querySelectorAll('nav button').forEach(b => b.dataset.ir === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
-  if (v === 'hist') renderHist();
-  if (v === 'pedido') renderResumo();
+// ---------- gravação ----------
+function limpo(p) {
+  return {id: p.id, criado: p.criado, atualizado: p.atualizado, enviadoEm: p.enviadoEm, cliente: p.cliente, cidade: p.cidade,
+    frete: p.frete, taxaManual: p.taxaManual, obs: p.obs, tot: totais(cfg, p),
+    notas: p.notas.map(n => { const c = Object.assign({}, n); delete c.img; c.itens = n.itens.map(i => Object.assign({}, i)); return c; })};
+}
+async function gravar(p) {
+  if (!p || p._apagado) return;
+  const vazio = !p.cliente && !p.cidade && !p.obs && p.frete == null && !p.notas.length;
+  if (vazio && !p._gravado) return;
+  const s = limpo(p), i = lista.findIndex(x => x.id === p.id);
+  if (i >= 0) lista[i] = s; else lista.unshift(s);
+  p._gravado = true;
+  try { await DB.put('pedidos', p.id, s); if (p === ped) $('#ed-salvo').textContent = 'Salvo neste aparelho'; }
+  catch (e) { falhaDB(); }
+}
+let salvarT;
+function salvar() {
+  if (!ped) return;
+  const p = ped; p.atualizado = Date.now();
+  $('#ed-salvo').textContent = 'Salvando…';
+  clearTimeout(salvarT); salvarT = setTimeout(() => gravar(p), 400);
+}
+async function sair() { if (ped) { clearTimeout(salvarT); const p = ped; ped = null; await gravar(p); } }
+document.addEventListener('visibilitychange', () => { if (document.hidden && ped) { clearTimeout(salvarT); gravar(ped); } });
+
+// ---------- rotas ----------
+function mostrar(tela) {
+  ['pedidos', 'editor', 'ajustes'].forEach(k => { $('#t-' + k).hidden = k !== tela; });
+  document.body.dataset.tela = tela;
+  document.querySelectorAll('[data-nav]').forEach(a => a.dataset.nav === tela ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   window.scrollTo(0, 0);
 }
-document.addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if (b) ir(b.dataset.ir); });
+async function rota() {
+  const [a, b] = location.hash.replace(/^#\/?/, '').split('/');
+  if (a === 'novo') { pend = novoPedido(); location.replace('#/pedido/' + pend.id); return; }
+  if (a === 'pedido' && b) return abrir(b);
+  await sair();
+  if (a === 'ajustes') { preencherCfg(); mostrar('ajustes'); }
+  else { renderLista(); mostrar('pedidos'); }
+}
+window.addEventListener('hashchange', rota);
 
-// ---------- notas ----------
+async function abrir(id) {
+  if (ped && ped.id === id) { mostrar('editor'); return; }
+  await sair();
+  const m = lista.find(p => p.id === id);
+  if (m) { ped = JSON.parse(JSON.stringify(m)); ped._gravado = true; }
+  else if (pend && pend.id === id) ped = pend;
+  else { location.replace('#/pedidos'); return; }
+  pend = null;
+  ped.notas.forEach(n => { if (n.status === 'lendo') { n.status = 'erro'; n.erro = 'A leitura foi interrompida.'; if (!n.itens.length) n.itens.push(itemVazio()); } });
+  mostrar('editor'); renderEditor();
+  const atual = ped;
+  for (const n of atual.notas) {
+    if (n.img || !n.temFoto) continue;
+    try { n.img = await DB.get('fotos', n.id); } catch (e) {}
+    if (ped === atual && n.img) trocaNota(n);
+  }
+}
+
+// ---------- lista ----------
+function renderLista() {
+  const mes = hojeISO().slice(0, 7), doMes = lista.filter(p => p.enviadoEm && (p.criado || '').slice(0, 7) === mes);
+  $('#s-mes').textContent = 'Serviço em ' + new Date().toLocaleDateString('pt-BR', {month: 'long'});
+  $('#s-taxa').textContent = money(doMes.reduce((s, p) => s + ((p.tot && p.tot.taxa) || 0), 0));
+  $('#s-compras').textContent = money(doMes.reduce((s, p) => s + ((p.tot && p.tot.compras) || 0), 0));
+  $('#s-n').textContent = doMes.length;
+  $('#csv').disabled = !lista.length;
+  const q = norm($('#busca').value);
+  const l = lista.filter(p => !q || norm(p.cliente + ' ' + p.cidade).includes(q)).sort((a, b) => (b.atualizado || 0) - (a.atualizado || 0));
+  if (!lista.length) { $('#lista').innerHTML = '<p class="vazio">Nenhum pedido ainda.<br>Toque em "Novo pedido" e fotografe a primeira nota.</p>'; return; }
+  if (!l.length) { $('#lista').innerHTML = '<p class="vazio">Nenhum pedido encontrado para essa busca.</p>'; return; }
+  $('#lista').innerHTML = '<div class="lin cab"><span class="c-cli">Cliente</span><span class="c-meta"><span class="c-data">Data</span><span class="c-notas">Notas</span><span class="c-st">Situação</span></span><span class="c-compras">Compras</span><span class="c-taxa">Serviço</span></div>' +
+    l.map(p => {
+      const t = p.tot || {compras: 0, taxa: 0};
+      return '<a class="lin" href="#/pedido/' + p.id + '">' +
+        '<span class="c-cli"><b>' + esc(p.cliente || 'Sem nome') + '</b><small>' + esc(p.cidade) + '</small></span>' +
+        '<span class="c-meta"><span class="c-data">' + dataBR(p.criado) + '</span>' + (p.cidade ? '<span class="so-mob">' + esc(p.cidade) + '</span>' : '') +
+        '<span class="c-notas">' + pl(p.notas.length, 'nota', 'notas') + '</span>' +
+        '<span class="c-st"><i class="chip' + (p.enviadoEm ? ' env">Enviado' : '">Rascunho') + '</i></span></span>' +
+        '<span class="c-compras">' + money(t.compras) + '</span>' +
+        '<span class="c-taxa"><span class="so-mob">serviço </span>' + money(t.taxa) + '</span></a>';
+    }).join('');
+}
+$('#busca').addEventListener('input', renderLista);
+$('#csv').addEventListener('click', () => {
+  const c = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const rows = [['Data do pedido', 'Cliente', 'Cidade', 'Situação', 'Loja', 'Nota', 'Data da nota', 'Descrição', 'Qtd', 'Valor unitário', 'Valor total', 'Frete do pedido', 'Serviço do pedido'].map(c).join(';')];
+  lista.slice().sort((a, b) => (a.criado || '').localeCompare(b.criado || '')).forEach(p => {
+    let primeira = true; const t = p.tot || {};
+    p.notas.forEach(n => n.itens.forEach(i => {
+      if (!i.d && !i.t) return;
+      rows.push([dataBR(p.criado), p.cliente, p.cidade, p.enviadoEm ? 'Enviado' : 'Rascunho', n.loja, n.numero, dataBR(n.data), i.d, qtd(i.q), dec(i.u), dec(i.t), primeira ? dec(t.frete) : '', primeira ? dec(t.taxa) : ''].map(c).join(';'));
+      primeira = false;
+    }));
+  });
+  baixar(new Blob(['\ufeff' + rows.join('\r\n')], {type: 'text/csv;charset=utf-8'}), 'pedidos-' + hojeISO() + '.csv');
+  toast('Planilha baixada.');
+});
+
+// ---------- editor ----------
+function renderEditor() {
+  $('#cliente').value = ped.cliente; $('#cidade').value = ped.cidade; $('#obs').value = ped.obs;
+  $('#frete').value = ped.frete != null ? dec(ped.frete) : '';
+  $('#taxa').value = ped.taxaManual != null ? dec(ped.taxaManual) : '';
+  $('#ed-salvo').textContent = ped._gravado ? 'Salvo neste aparelho' : '';
+  renderCab(); renderNotas();
+}
+function renderCab() {
+  $('#ed-titulo').textContent = ped.cliente || 'Novo pedido';
+  const c = $('#ed-chip'); c.className = 'chip' + (ped.enviadoEm ? ' env' : ''); c.textContent = ped.enviadoEm ? 'Enviado' : 'Rascunho';
+}
 function itemHTML(i, k) {
   return '<div class="item" data-i="' + k + '">' +
-    '<input data-f="d" aria-label="Descrição do item" placeholder="Descrição do item" value="' + esc(i.d) + '">' +
-    '<div class="nums">' +
-    '<label>Qtd<input data-f="q" inputmode="decimal" value="' + qtd(i.q) + '"></label>' +
-    '<label>Unitário<input data-f="u" inputmode="decimal" value="' + dec(i.u) + '"></label>' +
-    '<label>Total<input data-f="t" inputmode="decimal" value="' + dec(i.t) + '"></label>' +
-    '<button class="del" type="button" data-act="delitem" aria-label="Remover item">&times;</button>' +
-    '</div></div>';
+    '<label class="f-d"><span>Descrição</span><input data-f="d" value="' + esc(i.d) + '"></label>' +
+    '<label class="f-q"><span>Qtd</span><input data-f="q" inputmode="decimal" value="' + qtd(i.q) + '"></label>' +
+    '<label class="f-u"><span>Unitário</span><input data-f="u" inputmode="decimal" value="' + dec(i.u) + '"></label>' +
+    '<label class="f-t"><span>Total</span><input data-f="t" inputmode="decimal" value="' + dec(i.t) + '"></label>' +
+    '<button class="ic del" type="button" data-act="delitem" aria-label="Remover item"><svg class="i"><use href="#i-x"/></svg></button></div>';
 }
 function notaHTML(n) {
-  let h = '<article class="nota" data-n="' + n.id + '"><header>';
+  let h = '<article class="nota" data-n="' + n.id + '"><div class="n-cab' + (n.img ? '' : ' semfoto') + '">';
   if (n.img) h += '<button class="thumb" type="button" data-act="zoom" aria-label="Ampliar foto da nota"><img src="' + n.img + '" alt=""></button>';
-  h += '<div class="cab"><input data-nf="loja" aria-label="Loja" placeholder="Loja" value="' + esc(n.loja) + '">' +
-    '<div class="g2"><input data-nf="numero" aria-label="Número da nota" placeholder="Nº da nota" value="' + esc(n.numero) + '">' +
-    '<input data-nf="data" aria-label="Data da nota" type="date" value="' + esc(n.data) + '"></div></div></header>';
+  h += '<input class="f-loja" data-nf="loja" aria-label="Loja" placeholder="Loja" value="' + esc(n.loja) + '">' +
+    '<input data-nf="numero" aria-label="Número da nota" placeholder="Nº da nota" value="' + esc(n.numero) + '">' +
+    '<input data-nf="data" aria-label="Data da nota" type="date" value="' + esc(n.data) + '"></div>';
   if (n.status === 'lendo') h += '<p class="lendo">Lendo a nota…</p>';
   if (n.status === 'erro') h += '<p class="erro">' + esc(n.erro) + ' <button class="link" type="button" data-act="reler">Ler de novo</button></p>';
-  h += '<div class="itens">' + n.itens.map(itemHTML).join('') + '</div>' +
-    '<button class="link" type="button" data-act="additem">Adicionar item</button>' +
-    '<div class="rod"><label>Desconto<input data-nf="desconto" inputmode="decimal" placeholder="0,00" value="' + (n.desconto ? dec(n.desconto) : '') + '"></label>' +
+  h += '<div class="itens"><div class="itens-cab"><span>Descrição</span><span>Qtd</span><span>Unitário</span><span>Total</span><span></span></div>' + n.itens.map(itemHTML).join('') + '</div>' +
+    '<div class="n-rod"><label>Desconto<input data-nf="desconto" inputmode="decimal" placeholder="0,00" value="' + (n.desconto ? dec(n.desconto) : '') + '"></label>' +
     '<div>Total da nota<strong data-total></strong></div></div>' +
     '<p class="confira" data-conf hidden></p>' +
-    '<button class="link perigo" type="button" data-act="delnota">Remover nota</button></article>';
+    '<div class="n-acoes"><button class="link" type="button" data-act="additem">Adicionar item</button>' +
+    '<button class="link perigo" type="button" data-act="delnota">Remover nota</button></div></article>';
   return h;
 }
-function renderNotas() {
-  $('#notas').innerHTML = draft.notas.length ? draft.notas.map(notaHTML).join('') : '<p class="vazio">Nenhuma nota ainda. Fotografe a primeira para começar.</p>';
-  renderResumo();
-}
+function renderNotas() { $('#notas').innerHTML = ped.notas.map(notaHTML).join(''); renderResumo(); }
 function trocaNota(n) {
   const el = document.querySelector('.nota[data-n="' + n.id + '"]');
   if (el) el.outerHTML = notaHTML(n); else renderNotas();
   renderResumo();
 }
 function renderResumo() {
-  draft.notas.forEach(n => {
+  if (!ped) return;
+  ped.notas.forEach(n => {
     const el = document.querySelector('.nota[data-n="' + n.id + '"]'); if (!el) return;
     const tn = totalNota(n);
     el.querySelector('[data-total]').textContent = money(tn);
-    const c = el.querySelector('[data-conf]');
-    const dif = n.totalLido != null && Math.abs(n.totalLido - tn) > 0.009;
+    const c = el.querySelector('[data-conf]'), dif = n.totalLido != null && Math.abs(n.totalLido - tn) > 0.009;
     c.hidden = !dif;
     if (dif) c.textContent = 'Confira: na nota o total é ' + money(n.totalLido) + ', mas os itens somam ' + money(tn) + '.';
   });
-  const t = totais(cfg, draft), k = draft.notas.length;
-  $('#r-n').textContent = 'Compras' + (k ? ' (' + k + (k === 1 ? ' nota)' : ' notas)') : '');
+  const t = totais(cfg, ped), k = ped.notas.length;
+  $('#r-n').textContent = 'Compras' + (k ? ' (' + pl(k, 'nota', 'notas') + ')' : '');
   $('#r-compras').textContent = money(t.compras);
   $('#r-frete').textContent = money(t.frete);
   $('#r-taxa').textContent = money(t.taxa);
-  $('#r-pagar').textContent = money(t.pagar);
+  $('#r-pagar').textContent = $('#b-pagar').textContent = money(t.pagar);
   $('#r-geral').textContent = money(t.geral);
   const tx = $('#taxa'), info = $('#taxainfo');
-  if (draft.taxaManual != null) {
-    info.innerHTML = 'Valor digitado à mão. <button class="link" type="button" id="taxaauto" style="padding:0">Voltar ao cálculo automático</button>';
+  if (ped.taxaManual != null) {
+    info.innerHTML = 'Serviço digitado à mão. <button class="link" type="button" id="taxaauto">Voltar ao cálculo automático</button>';
   } else {
     if (document.activeElement !== tx) tx.value = t.auto ? dec(t.auto) : '';
-    info.innerHTML = t.auto == null
-      ? 'Para calcular sozinho, informe quanto você cobra em <button class="link" type="button" data-ir="cfg" style="padding:0">Ajustes</button>.'
-      : 'Calculado pela sua regra. Digite outro valor se combinou diferente.';
+    info.innerHTML = t.auto == null ? 'Para o serviço ser calculado sozinho, informe quanto você cobra em <a href="#/ajustes">Ajustes</a>.'
+      : 'Serviço calculado pela sua regra. Digite outro valor se combinou diferente.';
   }
   $('#semchave').hidden = !!cfg.key;
 }
 
-const acharNota = el => { const a = el.closest('.nota'); return a && draft.notas.find(n => n.id === a.dataset.n); };
-
+const acharNota = el => { const a = el.closest('.nota'); return a && ped && ped.notas.find(n => n.id === a.dataset.n); };
 $('#notas').addEventListener('input', e => {
   const n = acharNota(e.target); if (!n) return;
   const el = e.target;
-  if (el.dataset.nf) {
-    n[el.dataset.nf] = el.dataset.nf === 'desconto' ? (parseBR(el.value) || 0) : el.value;
-  } else if (el.dataset.f) {
+  if (el.dataset.nf) n[el.dataset.nf] = el.dataset.nf === 'desconto' ? (parseBR(el.value) || 0) : el.value;
+  else if (el.dataset.f) {
     const row = el.closest('.item'), i = n.itens[+row.dataset.i], f = el.dataset.f;
     if (f === 'd') i.d = el.value;
     else {
@@ -495,10 +772,13 @@ $('#notas').addEventListener('click', e => {
   const n = acharNota(b); if (!n) return;
   const act = b.dataset.act;
   if (act === 'zoom') { $('#zoom img').src = n.img; $('#zoom').showModal(); return; }
-  if (act === 'additem') { n.itens.push({d: '', q: 1, u: null, t: null}); trocaNota(n); const ins = document.querySelectorAll('.nota[data-n="' + n.id + '"] [data-f=d]'); ins[ins.length - 1].focus(); }
+  if (act === 'reler') { lerNota(n); return; }
+  if (act === 'additem') { n.itens.push(itemVazio()); trocaNota(n); const ins = document.querySelectorAll('.nota[data-n="' + n.id + '"] [data-f=d]'); ins[ins.length - 1].focus(); }
   if (act === 'delitem') { n.itens.splice(+b.closest('.item').dataset.i, 1); trocaNota(n); }
-  if (act === 'delnota') { if (!confirm('Remover esta nota do pedido?')) return; draft.notas = draft.notas.filter(x => x !== n); renderNotas(); }
-  if (act === 'reler') lerNota(n);
+  if (act === 'delnota') {
+    if (!confirm('Remover esta nota do pedido?')) return;
+    ped.notas = ped.notas.filter(x => x !== n); DB.del('fotos', n.id).catch(() => {}); renderNotas();
+  }
   salvar();
 });
 $('#zoom').addEventListener('click', () => $('#zoom').close());
@@ -516,24 +796,55 @@ function resize(file) {
     im.src = url;
   });
 }
-const novaNota = extra => Object.assign({id: uid(), img: null, w: 0, h: 0, loja: '', cnpj: '', data: '', numero: '', itens: [], desconto: 0, totalLido: null, status: 'ok', erro: ''}, extra);
+const novaNota = extra => Object.assign({id: uid(), img: null, temFoto: false, w: 0, h: 0, loja: '', cnpj: '', data: '', numero: '', itens: [], desconto: 0, totalLido: null, status: 'ok', erro: ''}, extra);
 
-$('#arq').addEventListener('change', async e => {
-  const files = [...e.target.files]; e.target.value = '';
+async function adicionarFotos(files) {
+  const dono = ped; if (!dono) return;
+  files = [...files].filter(f => /^image\//.test(f.type));
+  if (!files.length) { toast('Envie a nota como foto (JPG ou PNG).'); return; }
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   for (const f of files) {
     let r;
     try { r = await resize(f); } catch (err) { toast('Não foi possível abrir "' + f.name + '". Envie uma foto em JPG ou PNG.'); continue; }
-    const n = novaNota(r);
-    if (!cfg.key) n.itens.push({d: '', q: 1, u: null, t: null});
-    draft.notas.push(n); renderNotas(); salvar();
-    if (cfg.key) await lerNota(n);
-    else { n.status = 'erro'; n.erro = 'A nota não foi lida porque falta a chave do Gemini. Cadastre a chave em Ajustes e toque em'; trocaNota(n); salvar(); }
+    const n = novaNota(r); n.temFoto = true;
+    DB.put('fotos', n.id, n.img).catch(falhaDB);
+    dono.notas.push(n);
+    if (ped === dono) { renderNotas(); salvar(); } else gravar(dono);
+    if (cfg.key) await lerNota(n, dono);
+    else {
+      n.status = 'erro'; n.erro = 'Falta a chave do Gemini para ler esta nota. Cadastre em Ajustes e depois toque em'; n.itens.push(itemVazio());
+      if (ped === dono) { trocaNota(n); salvar(); }
+    }
   }
+}
+$('#arq').addEventListener('change', e => { const f = [...e.target.files]; e.target.value = ''; adicionarFotos(f); });
+const solta = $('#solta');
+['dragenter', 'dragover'].forEach(ev => solta.addEventListener(ev, e => { e.preventDefault(); solta.classList.add('sobre'); }));
+['dragleave', 'drop'].forEach(ev => solta.addEventListener(ev, e => { e.preventDefault(); solta.classList.remove('sobre'); }));
+solta.addEventListener('drop', e => adicionarFotos(e.dataTransfer.files));
+document.addEventListener('paste', e => {
+  if (document.body.dataset.tela !== 'editor' || !e.clipboardData) return;
+  const f = [...e.clipboardData.files].filter(x => /^image\//.test(x.type));
+  if (f.length) { e.preventDefault(); adicionarFotos(f); }
 });
 $('#manual').addEventListener('click', () => {
-  const n = novaNota({data: hojeISO(), itens: [{d: '', q: 1, u: null, t: null}]});
-  draft.notas.push(n); renderNotas(); salvar();
+  const n = novaNota({data: hojeISO(), itens: [itemVazio()]});
+  ped.notas.push(n); renderNotas(); salvar();
   document.querySelector('.nota[data-n="' + n.id + '"] [data-nf=loja]').focus();
+});
+
+$('#cliente').addEventListener('input', e => { ped.cliente = e.target.value; renderCab(); salvar(); });
+$('#cidade').addEventListener('input', e => { ped.cidade = e.target.value; salvar(); });
+$('#obs').addEventListener('input', e => { ped.obs = e.target.value; salvar(); });
+$('#frete').addEventListener('input', e => { ped.frete = parseBR(e.target.value); renderResumo(); salvar(); });
+$('#taxa').addEventListener('input', e => { ped.taxaManual = parseBR(e.target.value); renderResumo(); salvar(); });
+$('#taxainfo').addEventListener('click', e => { if (e.target.id === 'taxaauto') { ped.taxaManual = null; renderResumo(); salvar(); } });
+$('#ed-excluir').addEventListener('click', async () => {
+  if (!confirm('Excluir este pedido? As notas e fotos dele serão apagadas deste aparelho.')) return;
+  const p = ped; p._apagado = true; clearTimeout(salvarT); ped = null;
+  lista = lista.filter(x => x.id !== p.id);
+  try { await DB.del('pedidos', p.id); for (const n of p.notas) await DB.del('fotos', n.id); } catch (e) {}
+  location.hash = '#/pedidos'; toast('Pedido excluído.');
 });
 
 // ---------- leitura (Gemini) ----------
@@ -592,9 +903,13 @@ async function gemini(dataUrl) {
   try { return JSON.parse(txt.replace(/```json|```/g, '').trim()); }
   catch (e) { throw new Error('A resposta da leitura veio incompleta. Leia de novo.'); }
 }
-async function lerNota(n) {
-  n.status = 'lendo'; trocaNota(n);
+async function lerNota(n, dono) {
+  dono = dono || ped;
+  const mostra = () => { if (ped === dono) trocaNota(n); };
+  n.status = 'lendo'; mostra();
   try {
+    if (!cfg.key) throw new Error('Falta a chave do Gemini para ler esta nota. Cadastre em Ajustes e depois toque em');
+    if (!n.img) throw new Error('A foto desta nota não está mais guardada neste aparelho.');
     const j = await gemini(n.img);
     const itens = (Array.isArray(j.itens) ? j.itens : []).map(i => {
       let q = parseBR(i.quantidade), u = parseBR(i.valor_unitario), t = parseBR(i.valor_total);
@@ -611,112 +926,62 @@ async function lerNota(n) {
     n.status = 'ok'; n.erro = '';
   } catch (e) {
     n.status = 'erro'; n.erro = e.message;
-    if (!n.itens.length) n.itens.push({d: '', q: 1, u: null, t: null});
+    if (!n.itens.length) n.itens.push(itemVazio());
   }
-  trocaNota(n); salvar();
+  mostra();
+  if (ped === dono) salvar(); else gravar(dono);
 }
 
-// ---------- campos do pedido ----------
-$('#cliente').addEventListener('input', e => { draft.cliente = e.target.value; salvar(); });
-$('#cidade').addEventListener('input', e => { draft.cidade = e.target.value; salvar(); });
-$('#obs').addEventListener('input', e => { draft.obs = e.target.value; salvar(); });
-$('#frete').addEventListener('input', e => { draft.frete = parseBR(e.target.value); renderResumo(); salvar(); });
-$('#taxa').addEventListener('input', e => { draft.taxaManual = parseBR(e.target.value); renderResumo(); salvar(); });
-$('#taxainfo').addEventListener('click', e => { if (e.target.id === 'taxaauto') { draft.taxaManual = null; renderResumo(); salvar(); } });
-
-function preencherPedido() {
-  $('#cliente').value = draft.cliente; $('#cidade').value = draft.cidade; $('#obs').value = draft.obs;
-  $('#frete').value = draft.frete != null ? dec(draft.frete) : '';
-  $('#taxa').value = draft.taxaManual != null ? dec(draft.taxaManual) : '';
-  renderNotas();
+// ---------- envio ----------
+const arqTeste = (() => { try { return new File([''], 'a.pdf', {type: 'application/pdf'}); } catch (e) { return null; } })();
+const podeShare = !!(arqTeste && navigator.canShare && navigator.canShare({files: [arqTeste]}));
+if (!podeShare) {
+  document.querySelectorAll('[data-env=share]').forEach(b => { b.hidden = true; });
+  $('.envio [data-env=pdf]').classList.add('pri'); $('.folha [data-env=pdf]').classList.add('dest');
 }
-
-// ---------- PDF, compartilhar, copiar ----------
 function pronto() {
-  if (!draft.notas.length) { toast('Adicione pelo menos uma nota antes.'); return false; }
-  if (draft.notas.some(n => n.status === 'lendo')) { toast('Espere a leitura das notas terminar.'); return false; }
+  if (!ped.notas.length) { toast('Adicione pelo menos uma nota antes de enviar.'); return false; }
+  if (ped.notas.some(n => n.status === 'lendo')) { toast('Espere a leitura das notas terminar.'); return false; }
   return true;
 }
 function gerarPdf() {
   if (!window.jspdf) { toast('O gerador de PDF não carregou. Confira a internet e recarregue a página.'); return null; }
-  const doc = buildPdf(window.jspdf.jsPDF, cfg, draft, hojeISO());
-  const nome = 'compras-' + ((draft.cliente || 'cliente').normalize('NFD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'cliente') + '-' + hojeISO() + '.pdf';
+  const doc = buildPdf(window.jspdf.jsPDF, cfg, ped, ped.criado);
+  const nome = 'compras-' + (norm(ped.cliente).replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') || 'cliente') + '-' + ped.criado + '.pdf';
   return {blob: doc.output('blob'), nome};
 }
 function baixar(blob, nome) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
-$('#baixar').addEventListener('click', () => { if (!pronto()) return; const p = gerarPdf(); if (p) { baixar(p.blob, p.nome); toast('PDF baixado.'); } });
-$('#compartilhar').addEventListener('click', async () => {
-  if (!pronto()) return;
-  const p = gerarPdf(); if (!p) return;
-  const file = new File([p.blob], p.nome, {type: 'application/pdf'});
-  if (navigator.canShare && navigator.canShare({files: [file]})) {
-    try { await navigator.share({files: [file], title: 'Resumo de compras'}); }
-    catch (e) { if (e.name !== 'AbortError') { baixar(p.blob, p.nome); toast('Não deu para abrir o compartilhamento. O PDF foi baixado: anexe na conversa.'); } }
-  } else {
-    baixar(p.blob, p.nome);
-    toast('Este aparelho não compartilha arquivos por aqui. O PDF foi baixado: anexe na conversa.');
+function marcarEnviado() { ped.enviadoEm = Date.now(); renderCab(); salvar(); }
+async function enviar(tipo) {
+  if ($('#folha').open) $('#folha').close();
+  if (!ped || !pronto()) return;
+  if (tipo === 'txt') {
+    const txt = resumoTexto(cfg, ped, ped.criado);
+    try { await navigator.clipboard.writeText(txt); }
+    catch (e) { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+    marcarEnviado(); toast('Resumo copiado. Cole na conversa do WhatsApp.'); return;
   }
-});
-$('#copiar').addEventListener('click', async () => {
-  if (!pronto()) return;
-  const txt = resumoTexto(cfg, draft, hojeISO());
-  try { await navigator.clipboard.writeText(txt); }
-  catch (e) { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
-  toast('Resumo copiado. Cole na conversa do WhatsApp.');
-});
-$('#concluir').addEventListener('click', () => {
-  if (!pronto()) return;
-  const t = totais(cfg, draft);
-  hist.unshift({id: uid(), quando: hojeISO(), cliente: draft.cliente, cidade: draft.cidade, compras: t.compras, frete: t.frete, taxa: t.taxa,
-    notas: draft.notas.map(n => ({loja: n.loja, numero: n.numero, data: n.data, desconto: n.desconto, total: totalNota(n), itens: n.itens.filter(i => i.d || i.t)}))});
-  if (!LS.set('np-hist', hist)) { hist.shift(); toast('O histórico está cheio. Baixe a planilha e apague pedidos antigos.'); return; }
-  draft = novoPedido(); DB.set('draft', draft); preencherPedido(); window.scrollTo(0, 0);
-  toast('Pedido salvo no histórico.');
-});
-$('#limpar').addEventListener('click', () => {
-  if (!confirm('Descartar este pedido? As notas e fotos dele serão apagadas.')) return;
-  draft = novoPedido(); DB.set('draft', draft); preencherPedido(); window.scrollTo(0, 0);
-});
-
-// ---------- histórico ----------
-function renderHist() {
-  const mes = hojeISO().slice(0, 7), doMes = hist.filter(p => p.quando.slice(0, 7) === mes);
-  const nome = new Date().toLocaleDateString('pt-BR', {month: 'long'});
-  $('#h-mes').textContent = 'Serviço em ' + nome;
-  $('#h-ganho').textContent = money(doMes.reduce((s, p) => s + (p.taxa || 0), 0));
-  $('#h-sub').textContent = doMes.length + (doMes.length === 1 ? ' pedido' : ' pedidos') + ' no mês, ' + money(doMes.reduce((s, p) => s + (p.compras || 0), 0)) + ' em compras.';
-  $('#h-lista').innerHTML = hist.length ? hist.map(p =>
-    '<div class="ped"><div><b>' + esc(p.cliente || 'Sem nome') + '</b><span>' + dataBR(p.quando) + (p.cidade ? ', ' + esc(p.cidade) : '') + '</span><br>' +
-    '<button class="link perigo" type="button" data-apagar="' + p.id + '" style="padding:2px 0;font-size:14px">Apagar</button></div>' +
-    '<div class="v"><b>' + money(p.compras) + '</b><span>serviço ' + money(p.taxa) + '</span></div></div>').join('')
-    : '<p class="vazio">Os pedidos que você salvar aparecem aqui.</p>';
-  $('#csv').disabled = !hist.length;
+  const p = gerarPdf(); if (!p) return;
+  if (tipo === 'share') {
+    try { await navigator.share({files: [new File([p.blob], p.nome, {type: 'application/pdf'})], title: 'Resumo de compras'}); marcarEnviado(); }
+    catch (e) { if (e.name !== 'AbortError') { baixar(p.blob, p.nome); marcarEnviado(); toast('Não deu para abrir o compartilhamento. O PDF foi baixado: anexe na conversa.'); } }
+    return;
+  }
+  baixar(p.blob, p.nome); marcarEnviado(); toast('PDF baixado.');
 }
-$('#h-lista').addEventListener('click', e => {
-  const id = e.target.dataset.apagar; if (!id || !confirm('Apagar este pedido do histórico?')) return;
-  hist = hist.filter(p => p.id !== id); LS.set('np-hist', hist); renderHist();
-});
-$('#csv').addEventListener('click', () => {
-  const c = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
-  const rows = [['Data do pedido', 'Cliente', 'Cidade', 'Loja', 'Nota', 'Data da nota', 'Descrição', 'Qtd', 'Valor unitário', 'Valor total', 'Frete do pedido', 'Serviço do pedido'].map(c).join(';')];
-  hist.forEach(p => {
-    let primeira = true;
-    p.notas.forEach(n => n.itens.forEach(i => {
-      rows.push([dataBR(p.quando), p.cliente, p.cidade, n.loja, n.numero, dataBR(n.data), i.d, qtd(i.q), dec(i.u), dec(i.t), primeira ? dec(p.frete) : '', primeira ? dec(p.taxa) : ''].map(c).join(';'));
-      primeira = false;
-    }));
-  });
-  baixar(new Blob(['\ufeff' + rows.join('\r\n')], {type: 'text/csv;charset=utf-8'}), 'compras-historico-' + hojeISO() + '.csv');
-});
+document.addEventListener('click', e => { const b = e.target.closest('[data-env]'); if (b) enviar(b.dataset.env); });
+$('#b-enviar').addEventListener('click', () => { if (pronto()) $('#folha').showModal(); });
+$('#folha-x').addEventListener('click', () => $('#folha').close());
+$('#folha').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.close(); });
 
 // ---------- ajustes ----------
 function exemplo() {
   const a = taxaAuto(cfg, 600), b = taxaAuto(cfg, 2500);
   $('#c-exemplo').textContent = a == null ? 'Preencha o valor fixo e a porcentagem para o serviço ser calculado sozinho.'
-    : 'Com essa regra: compra de R$ 600,00 paga ' + money(a) + ' e compra de R$ 2.500,00 paga ' + money(b) + '.';
+    : 'Com essa regra, uma compra de R$ 600,00 paga ' + money(a) + ' e uma de R$ 2.500,00 paga ' + money(b) + '.';
 }
 function preencherModelos() {
   const l = cfg.modelos && cfg.modelos.length ? cfg.modelos : [cfg.model];
@@ -755,15 +1020,30 @@ $('#c-testar').addEventListener('click', async () => {
   } catch (e) { st.textContent = e.message; }
 });
 
+// ---------- migração da versão 1 ----------
+async function migrar() {
+  if (await DB.get('kv', 'migrado2')) return;
+  const antigos = LS.get('np-hist', []);
+  for (const h of antigos) {
+    const p = Object.assign(novoPedido(), {id: h.id || uid(), criado: h.quando || hojeISO(), enviadoEm: Date.parse(h.quando) || Date.now(), atualizado: Date.parse(h.quando) || Date.now(),
+      cliente: h.cliente || '', cidade: h.cidade || '', frete: h.frete || null, taxaManual: h.taxa == null ? null : h.taxa,
+      notas: (h.notas || []).map(n => novaNota({loja: n.loja || '', numero: n.numero || '', data: n.data || '', desconto: n.desconto || 0, itens: n.itens || []}))});
+    await DB.put('pedidos', p.id, limpo(p));
+  }
+  const d = await DB.get('kv', 'draft');
+  if (d && Array.isArray(d.notas) && (d.notas.length || d.cliente)) {
+    const p = Object.assign(novoPedido(), {cliente: d.cliente || '', cidade: d.cidade || '', frete: d.frete == null ? null : d.frete, taxaManual: d.taxaManual == null ? null : d.taxaManual, obs: d.obs || '', notas: d.notas});
+    for (const n of p.notas) { if (n.img) { n.temFoto = true; await DB.put('fotos', n.id, n.img); } }
+    await DB.put('pedidos', p.id, limpo(p));
+  }
+  await DB.put('kv', 'migrado2', true);
+}
+
 // ---------- início ----------
 (async function () {
-  preencherCfg(); preencherPedido();
-  const d = await DB.get('draft');
-  if (d && Array.isArray(d.notas)) {
-    draft = Object.assign(novoPedido(), d);
-    draft.notas.forEach(n => { if (n.status === 'lendo') { n.status = 'erro'; n.erro = 'A leitura foi interrompida.'; if (!n.itens.length) n.itens.push({d: '', q: 1, u: null, t: null}); } });
-    preencherPedido();
-  }
+  try { await migrar(); lista = (await DB.all('pedidos')) || []; }
+  catch (e) { lista = []; falhaDB(); }
+  rota();
 })();
 </script>
 </body>
