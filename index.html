@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#22308F">
+<title>Nota Pronta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#E7EBF4; --paper:#fff; --ink:#161A33; --blue:#22308F; --blue-d:#18236B;
+  --mute:#5F6785; --line:#D3D9E8; --mark:#FFE14D; --pink:#F7D3DF; --danger:#B3261E;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.topo{background:var(--blue);color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 18px 14px}
+.topo h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
+.topo p{margin:2px 0 0;font-size:14px;opacity:.85}
+main{max-width:600px;margin:0 auto;padding:14px 12px}
+.bloco{background:var(--paper);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{margin:0 0 12px;font-size:18px;font-weight:700;letter-spacing:-.01em}
+label{display:block;font-size:14px;font-weight:500;color:var(--mute);margin-bottom:10px}
+input,textarea,select{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:16px}
+textarea{min-height:64px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible,.btn:focus-within{outline:3px solid var(--mark);outline-offset:1px;border-color:var(--blue)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 16px;border:1.5px solid var(--blue);border-radius:10px;background:#fff;color:var(--blue);font:inherit;font-weight:600;cursor:pointer;text-align:center;margin:0}
+.btn.pri{background:var(--blue);color:#fff}
+.btn.pri:active{background:var(--blue-d)}
+.btn[disabled]{opacity:.5}
+.acoes{display:grid;gap:10px}
+.acoes.duas{grid-template-columns:1fr 1fr}
+.link{background:none;border:0;padding:8px 0;color:var(--blue);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}
+.link.perigo{color:var(--danger)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+small,.dica{display:block;font-size:13px;color:var(--mute);font-weight:400}
+.aviso{background:var(--pink);border-radius:8px;padding:10px 12px;font-size:14px;margin:12px 0 0}
+
+/* nota */
+.nota{border:1.5px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.nota header{display:flex;gap:10px;align-items:flex-start}
+.thumb{flex:none;width:64px;height:84px;padding:0;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg);cursor:zoom-in}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.cab{flex:1;min-width:0}
+.cab input{margin:0 0 8px}
+.lendo{margin:10px 0;padding:10px 12px;border-radius:8px;background:var(--bg);font-size:14px;font-weight:500}
+.lendo::before{content:"";display:inline-block;width:12px;height:12px;margin-right:8px;border:2px solid var(--blue);border-top-color:transparent;border-radius:50%;vertical-align:-1px;animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.lendo::before{animation:none}}
+.erro{margin:10px 0;padding:10px 12px;border-radius:8px;background:#FBE3E1;color:#7A1812;font-size:14px}
+.item{padding:10px 0;border-top:1px dashed var(--line)}
+.item input{margin-top:2px}
+.nums{display:grid;grid-template-columns:.8fr 1.1fr 1.1fr 40px;gap:8px;align-items:end;margin-top:6px}
+.nums label{margin:0;font-size:12px}
+.nums input{padding:8px;text-align:right}
+.del{height:42px;border:0;border-radius:8px;background:var(--bg);color:var(--mute);font-size:20px;cursor:pointer}
+.rod{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-top:1.5px solid var(--line);padding-top:10px;margin-top:4px}
+.rod label{margin:0;width:120px}
+.rod div{text-align:right;font-size:14px;color:var(--mute)}
+.rod strong{display:block;font-size:19px;color:var(--ink)}
+.confira{margin:10px 0 0;padding:8px 12px;border-radius:8px;background:var(--mark);font-size:14px}
+.vazio{color:var(--mute);margin:0 0 12px}
+
+/* recibo */
+.recibo{position:relative;background:var(--paper);padding:18px 16px 22px;margin-bottom:26px;border-radius:14px 14px 0 0}
+.recibo::after{content:"";position:absolute;left:0;right:0;bottom:-8px;height:16px;background:radial-gradient(circle at 8px 8px,var(--bg) 5.5px,transparent 6px) 0 0/16px 16px repeat-x}
+.recibo dl{margin:0}
+.recibo dl div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.recibo dt{color:var(--mute)}
+.recibo dd{margin:0;font-weight:600}
+.recibo .pagar{border-bottom:0;padding-top:12px;align-items:center}
+.recibo .pagar dt{color:var(--ink);font-weight:700;font-size:17px}
+.recibo mark{background:var(--mark);color:var(--ink);padding:3px 8px;border-radius:4px;font-size:24px;font-weight:700}
+.recibo .geral{border-bottom:0;font-size:14px}
+
+/* histórico */
+.mes{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.mes strong{font-size:24px}
+.ped{padding:12px 0;border-top:1px dashed var(--line);display:flex;justify-content:space-between;gap:10px}
+.ped b{display:block}
+.ped span{font-size:14px;color:var(--mute)}
+.ped .v{text-align:right;white-space:nowrap}
+
+/* navegação */
+nav{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border-top:1.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{min-height:60px;border:0;background:none;color:var(--mute);font:inherit;font-weight:600;cursor:pointer;border-top:3px solid transparent;margin-top:-1.5px}
+nav button[aria-current=page]{color:var(--blue);border-top-color:var(--blue)}
+#toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:90%;background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:15px;z-index:9;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+dialog{border:0;padding:0;max-width:96vw;max-height:92vh;border-radius:10px;background:#000}
+dialog img{display:block;max-width:96vw;max-height:92vh}
+dialog::backdrop{background:rgba(22,26,51,.8)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="topo">
+  <h1>Nota Pronta</h1>
+  <p>Da foto da nota ao resumo para a cliente</p>
+</div>
+
+<main>
+<!-- PEDIDO -->
+<div id="v-pedido">
+  <section class="bloco">
+    <h2>Para quem é a compra</h2>
+    <div class="g2">
+      <label>Cliente<input id="cliente" autocomplete="off"></label>
+      <label>Cidade<input id="cidade" autocomplete="off"></label>
+    </div>
+  </section>
+
+  <section class="bloco">
+    <h2>Notas</h2>
+    <div id="notas"></div>
+    <div class="acoes">
+      <label class="btn pri">Fotografar ou escolher nota
+        <input class="vh" type="file" id="arq" accept="image/*" multiple>
+      </label>
+      <button class="btn" id="manual" type="button">Digitar uma nota sem foto</button>
+    </div>
+    <p class="aviso" id="semchave" hidden>As notas ainda não são lidas sozinhas. Para ligar a leitura automática, cadastre a chave gratuita em <button class="link" type="button" data-ir="cfg" style="padding:0">Ajustes</button>.</p>
+  </section>
+
+  <section class="bloco">
+    <h2>Frete e serviço</h2>
+    <div class="g2">
+      <label>Frete (R$)<input id="frete" inputmode="decimal" placeholder="0,00"></label>
+      <label>Serviço (R$)<input id="taxa" inputmode="decimal" placeholder="0,00"></label>
+    </div>
+    <small id="taxainfo"></small>
+    <label style="margin-top:12px">Observações para a cliente<textarea id="obs"></textarea></label>
+  </section>
+
+  <section class="recibo" aria-live="polite">
+    <h2>Resumo para a cliente</h2>
+    <dl>
+      <div><dt id="r-n">Compras</dt><dd id="r-compras"></dd></div>
+      <div><dt>Frete</dt><dd id="r-frete"></dd></div>
+      <div><dt>Serviço</dt><dd id="r-taxa"></dd></div>
+      <div class="pagar"><dt>Frete + serviço</dt><dd><mark id="r-pagar"></mark></dd></div>
+      <div class="geral"><dt>Total geral, com as compras</dt><dd id="r-geral"></dd></div>
+    </dl>
+  </section>
+
+  <div class="acoes">
+    <button class="btn pri" id="compartilhar" type="button">Compartilhar PDF</button>
+    <div class="acoes duas">
+      <button class="btn" id="baixar" type="button">Baixar PDF</button>
+      <button class="btn" id="copiar" type="button">Copiar resumo em texto</button>
+    </div>
+    <button class="btn" id="concluir" type="button">Salvar no histórico e começar outro</button>
+    <button class="link perigo" id="limpar" type="button">Descartar este pedido</button>
+  </div>
+</div>
+
+<!-- HISTÓRICO -->
+<div id="v-hist" hidden>
+  <section class="bloco">
+    <div class="mes"><h2 id="h-mes" style="margin:0"></h2><strong id="h-ganho"></strong></div>
+    <small id="h-sub"></small>
+  </section>
+  <section class="bloco">
+    <h2>Pedidos salvos</h2>
+    <div id="h-lista"></div>
+    <div class="acoes" style="margin-top:12px">
+      <button class="btn" id="csv" type="button">Baixar planilha (abre no Excel)</button>
+    </div>
+    <small style="margin-top:10px">O histórico fica guardado só neste aparelho, sem as fotos. Baixe a planilha de vez em quando para ter uma cópia.</small>
+  </section>
+</div>
+
+<!-- AJUSTES -->
+<div id="v-cfg" hidden>
+  <section class="bloco">
+    <h2>Quanto você cobra</h2>
+    <div class="g2">
+      <label>Compras até (R$)<input id="c-limite" inputmode="decimal"></label>
+      <label>Valor fixo (R$)<input id="c-fixo" inputmode="decimal" placeholder="ex.: 50,00"></label>
+    </div>
+    <div class="g2">
+      <label>Acima disso (%)<input id="c-pct" inputmode="decimal" placeholder="ex.: 10"></label>
+      <label>A porcentagem vale
+        <select id="c-modo">
+          <option value="total">sobre a compra toda</option>
+          <option value="excedente">só sobre o que passar, mais o fixo</option>
+        </select>
+      </label>
+    </div>
+    <small id="c-exemplo"></small>
+  </section>
+
+  <section class="bloco">
+    <h2>O que aparece no resumo</h2>
+    <label>Seu nome ou nome do negócio<input id="c-negocio" autocomplete="off"></label>
+    <label>Chave Pix para receber frete e serviço<input id="c-pix" autocomplete="off"></label>
+  </section>
+
+  <section class="bloco">
+    <h2>Leitura automática das notas</h2>
+    <p class="dica" style="margin:0 0 12px">A leitura usa o Gemini, do Google, na faixa gratuita. Crie uma chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>, copie e cole aqui. Ela fica guardada só neste aparelho.</p>
+    <label>Chave do Gemini<input id="c-key" type="password" autocomplete="off" spellcheck="false"></label>
+    <button class="btn" id="c-testar" type="button">Testar chave</button>
+    <small id="c-status" style="margin:8px 0 12px"></small>
+    <label>Modelo<select id="c-model"></select></label>
+  </section>
+</div>
+</main>
+
+<nav>
+  <button type="button" data-ir="pedido" aria-current="page">Pedido</button>
+  <button type="button" data-ir="hist">Histórico</button>
+  <button type="button" data-ir="cfg">Ajustes</button>
+</nav>
+<div id="toast" role="status"></div>
+<dialog id="zoom"><img alt="Foto da nota"></dialog>
+
+<script>
+/*PURO-INICIO*/
+const nf = new Intl.NumberFormat('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const money = v => 'R$ ' + nf.format(v || 0);
+const dec = v => (v == null || isNaN(v)) ? '' : nf.format(v);
+const qtd = v => (v == null || isNaN(v)) ? '' : String(Math.round(v * 1000) / 1000).replace('.', ',');
+const r2 = v => Math.round((v || 0) * 100) / 100;
+
+function parseBR(s) {
+  if (typeof s === 'number') return isNaN(s) ? null : s;
+  s = String(s == null ? '' : s).replace(/[^\d,.-]/g, '');
+  if (!s) return null;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+  const v = parseFloat(s);
+  return isNaN(v) ? null : v;
+}
+function dataBR(s) {
+  if (!s) return '';
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s);
+  return m ? m[3] + '/' + m[2] + '/' + m[1] : String(s);
+}
+function totalNota(n) {
+  return r2(n.itens.reduce((s, i) => s + (i.t || 0), 0) - (n.desconto || 0));
+}
+function taxaAuto(cfg, compras) {
+  if (cfg.fixo == null && cfg.pct == null) return null;
+  const fixo = cfg.fixo || 0, pct = (cfg.pct || 0) / 100, lim = cfg.limite == null ? 1000 : cfg.limite;
+  if (compras <= 0) return 0;
+  if (compras <= lim) return r2(fixo);
+  return r2(cfg.modo === 'excedente' ? fixo + (compras - lim) * pct : compras * pct);
+}
+function totais(cfg, d) {
+  const compras = r2(d.notas.reduce((s, n) => s + totalNota(n), 0));
+  const frete = d.frete || 0;
+  const auto = taxaAuto(cfg, compras);
+  const taxa = d.taxaManual != null ? d.taxaManual : (auto || 0);
+  return {compras, frete, taxa, auto, pagar: r2(frete + taxa), geral: r2(compras + frete + taxa)};
+}
+function resumoTexto(cfg, d, quando) {
+  const t = totais(cfg, d), L = [];
+  L.push('*Resumo das compras' + (d.cliente ? ' - ' + d.cliente : '') + '*');
+  L.push(dataBR(quando), '');
+  d.notas.forEach((n, k) => {
+    L.push('*' + (n.loja || 'Nota ' + (k + 1)) + '*' + (n.numero ? ' (nota ' + n.numero + ')' : ''));
+    n.itens.forEach(i => { if (i.d || i.t) L.push('- ' + qtd(i.q == null ? 1 : i.q) + ' x ' + (i.d || 'item') + ': ' + money(i.t)); });
+    if (n.desconto) L.push('Desconto: ' + money(n.desconto));
+    L.push('Total da nota: ' + money(totalNota(n)), '');
+  });
+  L.push('Compras: ' + money(t.compras), 'Frete: ' + money(t.frete), 'Serviço: ' + money(t.taxa));
+  L.push('*Frete + serviço: ' + money(t.pagar) + '*');
+  if (cfg.pix) L.push('Pix: ' + cfg.pix);
+  if (d.obs) L.push('', d.obs);
+  return L.join('\n');
+}
+
+function buildPdf(JsPDF, cfg, d, quando) {
+  const doc = new JsPDF({unit: 'mm', format: 'a4'});
+  const W = 210, H = 297, M = 15, R = W - M;
+  const ink = [22, 26, 51], blue = [34, 48, 143], grey = [95, 103, 133], line = [211, 217, 232];
+  const t = totais(cfg, d);
+  let y = M;
+  const need = h => { if (y + h > H - M - 8) { doc.addPage(); y = M; } };
+  const font = (st, sz, c) => { doc.setFont('helvetica', st); doc.setFontSize(sz); doc.setTextColor(...c); };
+
+  font('bold', 18, blue); doc.text(cfg.negocio || 'Resumo de compras', M, y + 6);
+  font('normal', 10, grey); doc.text(dataBR(quando), R, y + 6, {align: 'right'});
+  y += 12;
+  if (cfg.negocio) { doc.text('Resumo de compras', M, y); y += 6; }
+  font('normal', 12, ink);
+  doc.text('Cliente: ' + (d.cliente || '-') + (d.cidade ? ' (' + d.cidade + ')' : ''), M, y + 2);
+  y += 8;
+
+  const rows = [
+    ['Compras (' + d.notas.length + (d.notas.length === 1 ? ' nota)' : ' notas)'), money(t.compras), 0],
+    ['Frete', money(t.frete), 0],
+    ['Serviço', money(t.taxa), 0],
+    ['Frete + serviço', money(t.pagar), 1],
+    ['Total geral, com as compras', money(t.geral), 0]
+  ];
+  const bh = 6 + rows.length * 6.5;
+  doc.setFillColor(238, 241, 248); doc.roundedRect(M, y, W - 2 * M, bh, 2, 2, 'F');
+  let ry = y + 7.5;
+  rows.forEach(r => {
+    font(r[2] ? 'bold' : 'normal', r[2] ? 12 : 10.5, ink);
+    doc.text(r[0], M + 5, ry); doc.text(r[1], R - 5, ry, {align: 'right'}); ry += 6.5;
+  });
+  y += bh + 6;
+  if (cfg.pix) { font('normal', 10.5, ink); doc.text('Pix para frete e serviço: ' + cfg.pix, M, y); y += 6; }
+  if (d.obs) {
+    font('normal', 10, grey);
+    const ls = doc.splitTextToSize(d.obs, W - 2 * M);
+    need(ls.length * 4.6); doc.text(ls, M, y); y += ls.length * 4.6 + 2;
+  }
+  y += 3;
+
+  const cQ = M + 118, cU = M + 150;
+  d.notas.forEach((n, k) => {
+    need(26);
+    font('bold', 12.5, blue); doc.text(n.loja || 'Nota ' + (k + 1), M, y); y += 5;
+    const sub = [n.numero ? 'Nota ' + n.numero : '', dataBR(n.data), n.cnpj ? 'CNPJ ' + n.cnpj : ''].filter(Boolean).join('   ');
+    if (sub) { font('normal', 9, grey); doc.text(sub, M, y); y += 5; }
+    font('bold', 9, grey);
+    doc.text('Descrição', M, y + 1); doc.text('Qtd', cQ, y + 1, {align: 'right'});
+    doc.text('Unitário', cU, y + 1, {align: 'right'}); doc.text('Total', R, y + 1, {align: 'right'});
+    y += 3; doc.setDrawColor(...line); doc.setLineWidth(.3); doc.line(M, y, R, y); y += 4.5;
+    n.itens.forEach(i => {
+      if (!i.d && !i.t) return;
+      font('normal', 10, ink);
+      const ls = doc.splitTextToSize(i.d || 'item', 100), h = ls.length * 4.6 + 1.6;
+      need(h);
+      doc.text(ls, M, y); doc.text(qtd(i.q == null ? 1 : i.q), cQ, y, {align: 'right'});
+      doc.text(dec(i.u), cU, y, {align: 'right'}); doc.text(dec(i.t), R, y, {align: 'right'});
+      y += h;
+    });
+    need(14);
+    doc.line(M, y - 2.5, R, y - 2.5); y += 2.5;
+    if (n.desconto) { font('normal', 10, ink); doc.text('Desconto', cU, y, {align: 'right'}); doc.text('- ' + dec(n.desconto), R, y, {align: 'right'}); y += 5.5; }
+    font('bold', 11, ink); doc.text('Total da nota', cU, y, {align: 'right'}); doc.text(money(totalNota(n)), R, y, {align: 'right'});
+    y += 11;
+  });
+
+  d.notas.forEach((n, k) => {
+    if (!n.img) return;
+    doc.addPage();
+    font('bold', 11, blue); doc.text('Foto da nota: ' + (n.loja || 'Nota ' + (k + 1)), M, M + 2);
+    const mw = W - 2 * M, mh = H - 2 * M - 16, s = Math.min(mw / (n.w || 3), mh / (n.h || 4));
+    const iw = (n.w || 3) * s, ih = (n.h || 4) * s;
+    doc.addImage(n.img, 'JPEG', (W - iw) / 2, M + 7, iw, ih);
+  });
+
+  const np = doc.getNumberOfPages();
+  for (let p = 1; p <= np; p++) {
+    doc.setPage(p); font('normal', 8.5, grey);
+    doc.text('Página ' + p + ' de ' + np, R, H - 8, {align: 'right'});
+  }
+  return doc;
+}
+/*PURO-FIM*/
+
+// ---------- estado ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+};
+const DB = {
+  open() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('notapronta', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+  },
+  async get(k) {
+    try { const db = await this.open(); return await new Promise((res, rej) => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+    catch (e) { return null; }
+  },
+  async set(k, v) {
+    try { const db = await this.open(); await new Promise((res, rej) => { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+    catch (e) {}
+  }
+};
+const novoPedido = () => ({cliente: '', cidade: '', frete: null, taxaManual: null, obs: '', notas: []});
+const hojeISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+let cfg = Object.assign({key: '', model: 'gemini-2.5-flash', modelos: [], limite: 1000, fixo: null, pct: null, modo: 'total', negocio: '', pix: ''}, LS.get('np-cfg', {}));
+let hist = LS.get('np-hist', []);
+let draft = novoPedido();
+let salvarT;
+const salvar = () => { clearTimeout(salvarT); salvarT = setTimeout(() => DB.set('draft', draft), 400); };
+const salvarCfg = () => LS.set('np-cfg', cfg);
+
+let toastT;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 3800); }
+
+// ---------- navegação ----------
+function ir(v) {
+  ['pedido', 'hist', 'cfg'].forEach(k => { $('#v-' + k).hidden = k !== v; });
+  document.querySelectorAll('nav button').forEach(b => b.dataset.ir === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  if (v === 'hist') renderHist();
+  if (v === 'pedido') renderResumo();
+  window.scrollTo(0, 0);
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if (b) ir(b.dataset.ir); });
+
+// ---------- notas ----------
+function itemHTML(i, k) {
+  return '<div class="item" data-i="' + k + '">' +
+    '<input data-f="d" aria-label="Descrição do item" placeholder="Descrição do item" value="' + esc(i.d) + '">' +
+    '<div class="nums">' +
+    '<label>Qtd<input data-f="q" inputmode="decimal" value="' + qtd(i.q) + '"></label>' +
+    '<label>Unitário<input data-f="u" inputmode="decimal" value="' + dec(i.u) + '"></label>' +
+    '<label>Total<input data-f="t" inputmode="decimal" value="' + dec(i.t) + '"></label>' +
+    '<button class="del" type="button" data-act="delitem" aria-label="Remover item">&times;</button>' +
+    '</div></div>';
+}
+function notaHTML(n) {
+  let h = '<article class="nota" data-n="' + n.id + '"><header>';
+  if (n.img) h += '<button class="thumb" type="button" data-act="zoom" aria-label="Ampliar foto da nota"><img src="' + n.img + '" alt=""></button>';
+  h += '<div class="cab"><input data-nf="loja" aria-label="Loja" placeholder="Loja" value="' + esc(n.loja) + '">' +
+    '<div class="g2"><input data-nf="numero" aria-label="Número da nota" placeholder="Nº da nota" value="' + esc(n.numero) + '">' +
+    '<input data-nf="data" aria-label="Data da nota" type="date" value="' + esc(n.data) + '"></div></div></header>';
+  if (n.status === 'lendo') h += '<p class="lendo">Lendo a nota…</p>';
+  if (n.status === 'erro') h += '<p class="erro">' + esc(n.erro) + ' <button class="link" type="button" data-act="reler">Ler de novo</button></p>';
+  h += '<div class="itens">' + n.itens.map(itemHTML).join('') + '</div>' +
+    '<button class="link" type="button" data-act="additem">Adicionar item</button>' +
+    '<div class="rod"><label>Desconto<input data-nf="desconto" inputmode="decimal" placeholder="0,00" value="' + (n.desconto ? dec(n.desconto) : '') + '"></label>' +
+    '<div>Total da nota<strong data-total></strong></div></div>' +
+    '<p class="confira" data-conf hidden></p>' +
+    '<button class="link perigo" type="button" data-act="delnota">Remover nota</button></article>';
+  return h;
+}
+function renderNotas() {
+  $('#notas').innerHTML = draft.notas.length ? draft.notas.map(notaHTML).join('') : '<p class="vazio">Nenhuma nota ainda. Fotografe a primeira para começar.</p>';
+  renderResumo();
+}
+function trocaNota(n) {
+  const el = document.querySelector('.nota[data-n="' + n.id + '"]');
+  if (el) el.outerHTML = notaHTML(n); else renderNotas();
+  renderResumo();
+}
+function renderResumo() {
+  draft.notas.forEach(n => {
+    const el = document.querySelector('.nota[data-n="' + n.id + '"]'); if (!el) return;
+    const tn = totalNota(n);
+    el.querySelector('[data-total]').textContent = money(tn);
+    const c = el.querySelector('[data-conf]');
+    const dif = n.totalLido != null && Math.abs(n.totalLido - tn) > 0.009;
+    c.hidden = !dif;
+    if (dif) c.textContent = 'Confira: na nota o total é ' + money(n.totalLido) + ', mas os itens somam ' + money(tn) + '.';
+  });
+  const t = totais(cfg, draft), k = draft.notas.length;
+  $('#r-n').textContent = 'Compras' + (k ? ' (' + k + (k === 1 ? ' nota)' : ' notas)') : '');
+  $('#r-compras').textContent = money(t.compras);
+  $('#r-frete').textContent = money(t.frete);
+  $('#r-taxa').textContent = money(t.taxa);
+  $('#r-pagar').textContent = money(t.pagar);
+  $('#r-geral').textContent = money(t.geral);
+  const tx = $('#taxa'), info = $('#taxainfo');
+  if (draft.taxaManual != null) {
+    info.innerHTML = 'Valor digitado à mão. <button class="link" type="button" id="taxaauto" style="padding:0">Voltar ao cálculo automático</button>';
+  } else {
+    if (document.activeElement !== tx) tx.value = t.auto ? dec(t.auto) : '';
+    info.innerHTML = t.auto == null
+      ? 'Para calcular sozinho, informe quanto você cobra em <button class="link" type="button" data-ir="cfg" style="padding:0">Ajustes</button>.'
+      : 'Calculado pela sua regra. Digite outro valor se combinou diferente.';
+  }
+  $('#semchave').hidden = !!cfg.key;
+}
+
+const acharNota = el => { const a = el.closest('.nota'); return a && draft.notas.find(n => n.id === a.dataset.n); };
+
+$('#notas').addEventListener('input', e => {
+  const n = acharNota(e.target); if (!n) return;
+  const el = e.target;
+  if (el.dataset.nf) {
+    n[el.dataset.nf] = el.dataset.nf === 'desconto' ? (parseBR(el.value) || 0) : el.value;
+  } else if (el.dataset.f) {
+    const row = el.closest('.item'), i = n.itens[+row.dataset.i], f = el.dataset.f;
+    if (f === 'd') i.d = el.value;
+    else {
+      i[f] = parseBR(el.value);
+      if (f !== 't' && i.u != null) { i.t = r2((i.q == null ? 1 : i.q) * i.u); row.querySelector('[data-f=t]').value = dec(i.t); }
+    }
+  }
+  renderResumo(); salvar();
+});
+$('#notas').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const n = acharNota(b); if (!n) return;
+  const act = b.dataset.act;
+  if (act === 'zoom') { $('#zoom img').src = n.img; $('#zoom').showModal(); return; }
+  if (act === 'additem') { n.itens.push({d: '', q: 1, u: null, t: null}); trocaNota(n); const ins = document.querySelectorAll('.nota[data-n="' + n.id + '"] [data-f=d]'); ins[ins.length - 1].focus(); }
+  if (act === 'delitem') { n.itens.splice(+b.closest('.item').dataset.i, 1); trocaNota(n); }
+  if (act === 'delnota') { if (!confirm('Remover esta nota do pedido?')) return; draft.notas = draft.notas.filter(x => x !== n); renderNotas(); }
+  if (act === 'reler') lerNota(n);
+  salvar();
+});
+$('#zoom').addEventListener('click', () => $('#zoom').close());
+
+function resize(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(im.width, im.height)), w = Math.round(im.width * k), h = Math.round(im.height * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+      URL.revokeObjectURL(url); res({img: c.toDataURL('image/jpeg', .82), w, h});
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); };
+    im.src = url;
+  });
+}
+const novaNota = extra => Object.assign({id: uid(), img: null, w: 0, h: 0, loja: '', cnpj: '', data: '', numero: '', itens: [], desconto: 0, totalLido: null, status: 'ok', erro: ''}, extra);
+
+$('#arq').addEventListener('change', async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  for (const f of files) {
+    let r;
+    try { r = await resize(f); } catch (err) { toast('Não foi possível abrir "' + f.name + '". Envie uma foto em JPG ou PNG.'); continue; }
+    const n = novaNota(r);
+    if (!cfg.key) n.itens.push({d: '', q: 1, u: null, t: null});
+    draft.notas.push(n); renderNotas(); salvar();
+    if (cfg.key) await lerNota(n);
+    else { n.status = 'erro'; n.erro = 'A nota não foi lida porque falta a chave do Gemini. Cadastre a chave em Ajustes e toque em'; trocaNota(n); salvar(); }
+  }
+});
+$('#manual').addEventListener('click', () => {
+  const n = novaNota({data: hojeISO(), itens: [{d: '', q: 1, u: null, t: null}]});
+  draft.notas.push(n); renderNotas(); salvar();
+  document.querySelector('.nota[data-n="' + n.id + '"] [data-nf=loja]').focus();
+});
+
+// ---------- leitura (Gemini) ----------
+const API = 'https://generativelanguage.googleapis.com/v1beta/models';
+const PROMPT = 'Você lê notas fiscais, cupons fiscais e pedidos de loja brasileiros, impressos ou escritos à mão. ' +
+  'Extraia os dados da imagem e responda SOMENTE com JSON neste formato: ' +
+  '{"loja": string|null, "cnpj": string|null, "data": "AAAA-MM-DD"|null, "numero": string|null, ' +
+  '"itens": [{"descricao": string, "quantidade": number|null, "valor_unitario": number|null, "valor_total": number|null}], ' +
+  '"desconto": number, "total": number|null}. ' +
+  'Regras: números com ponto decimal e sem símbolo de moeda. Liste todos os itens, na ordem da nota, sem inventar nenhum. ' +
+  'Se um valor estiver ilegível, use null. "loja" é o nome fantasia ou a razão social de quem vendeu. ' +
+  '"total" é o valor final pago que aparece na nota. "desconto" é a soma dos descontos, ou 0 se não houver. ' +
+  'Se a imagem não for uma nota ou pedido, devolva "itens" vazio.';
+
+function erroApi(st, m) {
+  if (st === 429) return 'O limite gratuito de leituras foi atingido por agora. Espere um minuto e leia de novo.';
+  if (st === 404) return 'O modelo escolhido não está mais disponível. Em Ajustes, toque em "Testar chave" para atualizar.';
+  if (st === 400 && /api key/i.test(m) || st === 401 || st === 403) return 'A chave do Gemini não foi aceita. Confira a chave em Ajustes.';
+  if (st >= 500) return 'O serviço de leitura está fora do ar. Leia de novo em instantes.';
+  return 'A leitura falhou (erro ' + st + '). ' + (m || '');
+}
+async function gemini(dataUrl) {
+  let r;
+  try {
+    r = await fetch(API + '/' + encodeURIComponent(cfg.model) + ':generateContent', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'x-goog-api-key': cfg.key},
+      body: JSON.stringify({
+        contents: [{parts: [{inline_data: {mime_type: 'image/jpeg', data: dataUrl.split(',')[1]}}, {text: PROMPT}]}],
+        generationConfig: {temperature: 0, responseMimeType: 'application/json'}
+      })
+    });
+  } catch (e) { throw new Error('Sem conexão com o serviço de leitura. Confira a internet.'); }
+  if (!r.ok) { let m = ''; try { m = (await r.json()).error.message; } catch (e) {} throw new Error(erroApi(r.status, m)); }
+  const j = await r.json();
+  const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+  const txt = parts.filter(p => !p.thought && p.text).map(p => p.text).join('');
+  if (!txt) throw new Error('A leitura voltou vazia. Tire outra foto, mais nítida e sem cortes.');
+  try { return JSON.parse(txt.replace(/```json|```/g, '').trim()); }
+  catch (e) { throw new Error('A resposta da leitura veio incompleta. Leia de novo.'); }
+}
+async function lerNota(n) {
+  n.status = 'lendo'; trocaNota(n);
+  try {
+    const j = await gemini(n.img);
+    const itens = (Array.isArray(j.itens) ? j.itens : []).map(i => {
+      let q = parseBR(i.quantidade), u = parseBR(i.valor_unitario), t = parseBR(i.valor_total);
+      if (q == null) q = 1;
+      if (t == null && u != null) t = r2(q * u);
+      if (u == null && t != null && q) u = r2(t / q);
+      return {d: String(i.descricao || ''), q, u, t};
+    });
+    if (!itens.length) throw new Error('Nenhum item foi encontrado nesta foto. Tire outra, mais nítida, ou preencha à mão.');
+    n.itens = itens;
+    n.loja = j.loja || n.loja; n.cnpj = j.cnpj || ''; n.numero = j.numero ? String(j.numero) : n.numero;
+    n.data = /^\d{4}-\d{2}-\d{2}$/.test(j.data || '') ? j.data : n.data;
+    n.desconto = Math.abs(parseBR(j.desconto) || 0); n.totalLido = parseBR(j.total);
+    n.status = 'ok'; n.erro = '';
+  } catch (e) {
+    n.status = 'erro'; n.erro = e.message;
+    if (!n.itens.length) n.itens.push({d: '', q: 1, u: null, t: null});
+  }
+  trocaNota(n); salvar();
+}
+
+// ---------- campos do pedido ----------
+$('#cliente').addEventListener('input', e => { draft.cliente = e.target.value; salvar(); });
+$('#cidade').addEventListener('input', e => { draft.cidade = e.target.value; salvar(); });
+$('#obs').addEventListener('input', e => { draft.obs = e.target.value; salvar(); });
+$('#frete').addEventListener('input', e => { draft.frete = parseBR(e.target.value); renderResumo(); salvar(); });
+$('#taxa').addEventListener('input', e => { draft.taxaManual = parseBR(e.target.value); renderResumo(); salvar(); });
+$('#taxainfo').addEventListener('click', e => { if (e.target.id === 'taxaauto') { draft.taxaManual = null; renderResumo(); salvar(); } });
+
+function preencherPedido() {
+  $('#cliente').value = draft.cliente; $('#cidade').value = draft.cidade; $('#obs').value = draft.obs;
+  $('#frete').value = draft.frete != null ? dec(draft.frete) : '';
+  $('#taxa').value = draft.taxaManual != null ? dec(draft.taxaManual) : '';
+  renderNotas();
+}
+
+// ---------- PDF, compartilhar, copiar ----------
+function pronto() {
+  if (!draft.notas.length) { toast('Adicione pelo menos uma nota antes.'); return false; }
+  if (draft.notas.some(n => n.status === 'lendo')) { toast('Espere a leitura das notas terminar.'); return false; }
+  return true;
+}
+function gerarPdf() {
+  if (!window.jspdf) { toast('O gerador de PDF não carregou. Confira a internet e recarregue a página.'); return null; }
+  const doc = buildPdf(window.jspdf.jsPDF, cfg, draft, hojeISO());
+  const nome = 'compras-' + ((draft.cliente || 'cliente').normalize('NFD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'cliente') + '-' + hojeISO() + '.pdf';
+  return {blob: doc.output('blob'), nome};
+}
+function baixar(blob, nome) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+$('#baixar').addEventListener('click', () => { if (!pronto()) return; const p = gerarPdf(); if (p) { baixar(p.blob, p.nome); toast('PDF baixado.'); } });
+$('#compartilhar').addEventListener('click', async () => {
+  if (!pronto()) return;
+  const p = gerarPdf(); if (!p) return;
+  const file = new File([p.blob], p.nome, {type: 'application/pdf'});
+  if (navigator.canShare && navigator.canShare({files: [file]})) {
+    try { await navigator.share({files: [file], title: 'Resumo de compras'}); }
+    catch (e) { if (e.name !== 'AbortError') { baixar(p.blob, p.nome); toast('Não deu para abrir o compartilhamento. O PDF foi baixado: anexe na conversa.'); } }
+  } else {
+    baixar(p.blob, p.nome);
+    toast('Este aparelho não compartilha arquivos por aqui. O PDF foi baixado: anexe na conversa.');
+  }
+});
+$('#copiar').addEventListener('click', async () => {
+  if (!pronto()) return;
+  const txt = resumoTexto(cfg, draft, hojeISO());
+  try { await navigator.clipboard.writeText(txt); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+  toast('Resumo copiado. Cole na conversa do WhatsApp.');
+});
+$('#concluir').addEventListener('click', () => {
+  if (!pronto()) return;
+  const t = totais(cfg, draft);
+  hist.unshift({id: uid(), quando: hojeISO(), cliente: draft.cliente, cidade: draft.cidade, compras: t.compras, frete: t.frete, taxa: t.taxa,
+    notas: draft.notas.map(n => ({loja: n.loja, numero: n.numero, data: n.data, desconto: n.desconto, total: totalNota(n), itens: n.itens.filter(i => i.d || i.t)}))});
+  if (!LS.set('np-hist', hist)) { hist.shift(); toast('O histórico está cheio. Baixe a planilha e apague pedidos antigos.'); return; }
+  draft = novoPedido(); DB.set('draft', draft); preencherPedido(); window.scrollTo(0, 0);
+  toast('Pedido salvo no histórico.');
+});
+$('#limpar').addEventListener('click', () => {
+  if (!confirm('Descartar este pedido? As notas e fotos dele serão apagadas.')) return;
+  draft = novoPedido(); DB.set('draft', draft); preencherPedido(); window.scrollTo(0, 0);
+});
+
+// ---------- histórico ----------
+function renderHist() {
+  const mes = hojeISO().slice(0, 7), doMes = hist.filter(p => p.quando.slice(0, 7) === mes);
+  const nome = new Date().toLocaleDateString('pt-BR', {month: 'long'});
+  $('#h-mes').textContent = 'Serviço em ' + nome;
+  $('#h-ganho').textContent = money(doMes.reduce((s, p) => s + (p.taxa || 0), 0));
+  $('#h-sub').textContent = doMes.length + (doMes.length === 1 ? ' pedido' : ' pedidos') + ' no mês, ' + money(doMes.reduce((s, p) => s + (p.compras || 0), 0)) + ' em compras.';
+  $('#h-lista').innerHTML = hist.length ? hist.map(p =>
+    '<div class="ped"><div><b>' + esc(p.cliente || 'Sem nome') + '</b><span>' + dataBR(p.quando) + (p.cidade ? ', ' + esc(p.cidade) : '') + '</span><br>' +
+    '<button class="link perigo" type="button" data-apagar="' + p.id + '" style="padding:2px 0;font-size:14px">Apagar</button></div>' +
+    '<div class="v"><b>' + money(p.compras) + '</b><span>serviço ' + money(p.taxa) + '</span></div></div>').join('')
+    : '<p class="vazio">Os pedidos que você salvar aparecem aqui.</p>';
+  $('#csv').disabled = !hist.length;
+}
+$('#h-lista').addEventListener('click', e => {
+  const id = e.target.dataset.apagar; if (!id || !confirm('Apagar este pedido do histórico?')) return;
+  hist = hist.filter(p => p.id !== id); LS.set('np-hist', hist); renderHist();
+});
+$('#csv').addEventListener('click', () => {
+  const c = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const rows = [['Data do pedido', 'Cliente', 'Cidade', 'Loja', 'Nota', 'Data da nota', 'Descrição', 'Qtd', 'Valor unitário', 'Valor total', 'Frete do pedido', 'Serviço do pedido'].map(c).join(';')];
+  hist.forEach(p => {
+    let primeira = true;
+    p.notas.forEach(n => n.itens.forEach(i => {
+      rows.push([dataBR(p.quando), p.cliente, p.cidade, n.loja, n.numero, dataBR(n.data), i.d, qtd(i.q), dec(i.u), dec(i.t), primeira ? dec(p.frete) : '', primeira ? dec(p.taxa) : ''].map(c).join(';'));
+      primeira = false;
+    }));
+  });
+  baixar(new Blob(['\ufeff' + rows.join('\r\n')], {type: 'text/csv;charset=utf-8'}), 'compras-historico-' + hojeISO() + '.csv');
+});
+
+// ---------- ajustes ----------
+function exemplo() {
+  const a = taxaAuto(cfg, 600), b = taxaAuto(cfg, 2500);
+  $('#c-exemplo').textContent = a == null ? 'Preencha o valor fixo e a porcentagem para o serviço ser calculado sozinho.'
+    : 'Com essa regra: compra de R$ 600,00 paga ' + money(a) + ' e compra de R$ 2.500,00 paga ' + money(b) + '.';
+}
+function preencherModelos() {
+  const l = cfg.modelos && cfg.modelos.length ? cfg.modelos : [cfg.model];
+  $('#c-model').innerHTML = l.map(m => '<option' + (m === cfg.model ? ' selected' : '') + '>' + esc(m) + '</option>').join('');
+}
+function preencherCfg() {
+  $('#c-limite').value = cfg.limite != null ? dec(cfg.limite) : '';
+  $('#c-fixo').value = cfg.fixo != null ? dec(cfg.fixo) : '';
+  $('#c-pct').value = cfg.pct != null ? qtd(cfg.pct) : '';
+  $('#c-modo').value = cfg.modo; $('#c-negocio').value = cfg.negocio; $('#c-pix').value = cfg.pix; $('#c-key').value = cfg.key;
+  preencherModelos(); exemplo();
+}
+[['c-limite', 'limite', 1], ['c-fixo', 'fixo', 1], ['c-pct', 'pct', 1], ['c-modo', 'modo', 0], ['c-negocio', 'negocio', 0], ['c-pix', 'pix', 0], ['c-key', 'key', 0], ['c-model', 'model', 0]].forEach(([id, k, numero]) => {
+  $('#' + id).addEventListener('input', e => { cfg[k] = numero ? parseBR(e.target.value) : e.target.value.trim(); salvarCfg(); exemplo(); });
+});
+$('#c-testar').addEventListener('click', async () => {
+  const st = $('#c-status');
+  if (!cfg.key) { st.textContent = 'Cole a chave no campo acima antes de testar.'; return; }
+  st.textContent = 'Testando…';
+  try {
+    let r;
+    try { r = await fetch(API + '?pageSize=200', {headers: {'x-goog-api-key': cfg.key}}); }
+    catch (e) { throw new Error('Sem conexão com o Google. Confira a internet.'); }
+    if (!r.ok) { let m = ''; try { m = (await r.json()).error.message; } catch (e) {} throw new Error(erroApi(r.status, m)); }
+    const j = await r.json();
+    const nota = n => { const m = /gemini-(\d+(?:\.\d+)?)-flash/.exec(n); return (m ? parseFloat(m[1]) * 100 : 0) - (/lite/.test(n) ? 1 : 0) - (/preview|exp/.test(n) ? 2 : 0); };
+    const l = (j.models || []).filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+      .map(m => m.name.replace('models/', '')).filter(n => /flash/.test(n) && !/image|tts|audio|live|embedding/.test(n))
+      .sort((a, b) => nota(b) - nota(a));
+    if (!l.length) throw new Error('Esta chave não tem nenhum modelo de leitura disponível.');
+    cfg.modelos = l; if (!l.includes(cfg.model)) cfg.model = l[0];
+    salvarCfg(); preencherModelos();
+    st.textContent = 'Chave funcionando. Modelo em uso: ' + cfg.model + '.';
+  } catch (e) { st.textContent = e.message; }
+});
+
+// ---------- início ----------
+(async function () {
+  preencherCfg(); preencherPedido();
+  const d = await DB.get('draft');
+  if (d && Array.isArray(d.notas)) {
+    draft = Object.assign(novoPedido(), d);
+    draft.notas.forEach(n => { if (n.status === 'lendo') { n.status = 'erro'; n.erro = 'A leitura foi interrompida.'; if (!n.itens.length) n.itens.push({d: '', q: 1, u: null, t: null}); } });
+    preencherPedido();
+  }
+})();
+</script>
+</body>
+</html>
