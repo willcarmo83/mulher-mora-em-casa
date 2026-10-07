@@ -549,25 +549,42 @@ const PROMPT = 'Você lê notas fiscais, cupons fiscais e pedidos de loja brasil
 
 function erroApi(st, m) {
   if (st === 429) return 'O limite gratuito de leituras foi atingido por agora. Espere um minuto e leia de novo.';
-  if (st === 404) return 'O modelo escolhido não está mais disponível. Em Ajustes, toque em "Testar chave" para atualizar.';
+  if (st === 404) return 'Nenhum modelo de leitura respondeu com esta chave. Resposta do Google: ' + (m || 'modelo não encontrado') + '.';
   if (st === 400 && /api key/i.test(m) || st === 401 || st === 403) return 'A chave do Gemini não foi aceita. Confira a chave em Ajustes.';
   if (st >= 500) return 'O serviço de leitura está fora do ar. Leia de novo em instantes.';
   return 'A leitura falhou (erro ' + st + '). ' + (m || '');
 }
-async function gemini(dataUrl) {
+async function pedir(model, body) {
   let r;
   try {
-    r = await fetch(API + '/' + encodeURIComponent(cfg.model) + ':generateContent', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json', 'x-goog-api-key': cfg.key},
-      body: JSON.stringify({
-        contents: [{parts: [{inline_data: {mime_type: 'image/jpeg', data: dataUrl.split(',')[1]}}, {text: PROMPT}]}],
-        generationConfig: {temperature: 0, responseMimeType: 'application/json'}
-      })
+    r = await fetch(API + '/' + encodeURIComponent(model) + ':generateContent', {
+      method: 'POST', headers: {'Content-Type': 'application/json', 'x-goog-api-key': cfg.key}, body: JSON.stringify(body)
     });
   } catch (e) { throw new Error('Sem conexão com o serviço de leitura. Confira a internet.'); }
-  if (!r.ok) { let m = ''; try { m = (await r.json()).error.message; } catch (e) {} throw new Error(erroApi(r.status, m)); }
-  const j = await r.json();
+  if (r.ok) return {ok: true, j: await r.json()};
+  let m = ''; try { m = (await r.json()).error.message; } catch (e) {}
+  return {ok: false, st: r.status, m};
+}
+function candidatos() {
+  const l = [cfg.model].concat(cfg.modelos || [], ['gemini-flash-latest', 'gemini-flash-lite-latest']);
+  return l.filter((m, i) => m && l.indexOf(m) === i).slice(0, 8);
+}
+// Tenta o modelo escolhido e, se ele não existir ou estiver sem cota, passa para o próximo da lista.
+async function gerar(body) {
+  let ult;
+  for (const m of candidatos()) {
+    const r = await pedir(m, body);
+    if (r.ok) { if (m !== cfg.model) { cfg.model = m; salvarCfg(); preencherModelos(); } return r.j; }
+    ult = r;
+    if (r.st !== 404 && r.st !== 429) break;
+  }
+  throw new Error(erroApi(ult.st, ult.m));
+}
+async function gemini(dataUrl) {
+  const j = await gerar({
+    contents: [{parts: [{inline_data: {mime_type: 'image/jpeg', data: dataUrl.split(',')[1]}}, {text: PROMPT}]}],
+    generationConfig: {temperature: 0, responseMimeType: 'application/json'}
+  });
   const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
   const txt = parts.filter(p => !p.thought && p.text).map(p => p.text).join('');
   if (!txt) throw new Error('A leitura voltou vazia. Tire outra foto, mais nítida e sem cortes.');
@@ -731,6 +748,8 @@ $('#c-testar').addEventListener('click', async () => {
     if (!l.length) throw new Error('Esta chave não tem nenhum modelo de leitura disponível.');
     cfg.modelos = l; if (!l.includes(cfg.model)) cfg.model = l[0];
     salvarCfg(); preencherModelos();
+    st.textContent = 'Chave aceita. Procurando um modelo que responda…';
+    await gerar({contents: [{parts: [{text: 'Responda apenas: ok'}]}]});
     st.textContent = 'Chave funcionando. Modelo em uso: ' + cfg.model + '.';
   } catch (e) { st.textContent = e.message; }
 });
