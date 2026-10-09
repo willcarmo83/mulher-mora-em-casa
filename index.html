@@ -266,7 +266,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
     <a class="novo" href="#/novo"><svg class="i"><use href="#i-mais"/></svg>Novo pedido</a>
     <a class="it p" href="#/pedidos" data-nav="pedidos"><svg class="i"><use href="#i-lista"/></svg>Pedidos</a>
     <a class="it a" href="#/ajustes" data-nav="ajustes"><svg class="i"><use href="#i-ajustes"/></svg>Ajustes</a>
-    <small class="versao">Versão 3.0</small>
+    <small class="versao">Versão 3.1</small>
   </nav>
 
   <main class="conteudo">
@@ -435,7 +435,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
           </div>
         </section>
       </div>
-      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 3.0</small></p>
+      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 3.1</small></p>
     </section>
   </main>
 </div>
@@ -627,7 +627,14 @@ const novoPedido = () => ({id: uid(), criado: hojeISO(), atualizado: Date.now(),
 const itemVazio = () => ({d: '', q: 1, u: null, t: null});
 
 // Para embutir a sincronização no arquivo (sem colar em cada aparelho), troque null pelo bloco de configuração do Firebase.
-const FB_FIXO = null;
+const FB_FIXO = {
+  apiKey: "AIzaSyCo6ksQZmD86-uoWlnmJ1ypPk8s82Oc6YI",
+  authDomain: "mulher-mora-em-casa.firebaseapp.com",
+  projectId: "mulher-mora-em-casa",
+  storageBucket: "mulher-mora-em-casa.firebasestorage.app",
+  messagingSenderId: "803122079775",
+  appId: "1:803122079775:web:598f7a9a638b0ee1f88d2a"
+};
 const DEV = LS.get('np-dev', null) || (() => { const d = uid(); LS.set('np-dev', d); return d; })();
 const plano = o => JSON.parse(JSON.stringify(o));
 const nao = pr => Promise.resolve(pr).catch(() => {});
