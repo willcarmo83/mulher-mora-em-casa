@@ -266,7 +266,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
     <a class="novo" href="#/novo"><svg class="i"><use href="#i-mais"/></svg>Novo pedido</a>
     <a class="it p" href="#/pedidos" data-nav="pedidos"><svg class="i"><use href="#i-lista"/></svg>Pedidos</a>
     <a class="it a" href="#/ajustes" data-nav="ajustes"><svg class="i"><use href="#i-ajustes"/></svg>Ajustes</a>
-    <small class="versao">Versão 3.1</small>
+    <small class="versao">Versão 3.2</small>
   </nav>
 
   <main class="conteudo">
@@ -435,7 +435,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
           </div>
         </section>
       </div>
-      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 3.1</small></p>
+      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 3.2</small></p>
     </section>
   </main>
 </div>
@@ -1031,13 +1031,27 @@ async function gemini(dataUrl, aviso) {
 }
 // Serviços de reserva, todos no formato "chat completions".
 const RES = {
-  groq: {nome: 'Groq', url: 'https://api.groq.com/openai/v1/chat/completions', modelo: 'meta-llama/llama-4-scout-17b-16e-instruct', onde: 'console.groq.com/keys', json: true},
+  groq: {nome: 'Groq', url: 'https://api.groq.com/openai/v1/chat/completions', modelo: 'qwen/qwen3.8-27b', alt: ['qwen/qwen3.6-27b'], onde: 'console.groq.com/keys', json: true},
   mistral: {nome: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', modelo: 'mistral-small-latest', onde: 'console.mistral.ai', json: true},
   openrouter: {nome: 'OpenRouter', url: 'https://openrouter.ai/api/v1/chat/completions', modelo: 'openrouter/free', onde: 'openrouter.ai/keys', json: false}
 };
 async function reserva(dataUrl, texto) {
-  const P = RES[cfg.rProv]; let r;
-  const body = {model: cfg.rModel || P.modelo, temperature: 0,
+  const P = RES[cfg.rProv];
+  // Se o modelo guardado não existir mais, tenta os modelos atuais do serviço e fica com o que responder.
+  const modelos = [cfg.rModel || P.modelo, P.modelo].concat(P.alt || []).filter((m, i, l) => m && l.indexOf(m) === i);
+  let ult;
+  for (const m of modelos) {
+    try {
+      const t = await reservaCom(P, m, dataUrl, texto);
+      if (m !== cfg.rModel) { cfg.rModel = m; salvarCfg(); const c = $('#c-rmodel'); if (c) c.value = m; }
+      return t;
+    } catch (e) { ult = e; if (!e.naoExiste) throw e; }
+  }
+  throw ult;
+}
+async function reservaCom(P, modelo, dataUrl, texto) {
+  let r;
+  const body = {model: modelo, temperature: 0,
     messages: [{role: 'user', content: [{type: 'text', text: texto || PROMPT}, {type: 'image_url', image_url: {url: dataUrl}}]}]};
   if (P.json && !texto) body.response_format = {type: 'json_object'};
   try { r = await fetch(P.url, {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.rKey}, body: JSON.stringify(body)}); }
@@ -1045,13 +1059,15 @@ async function reserva(dataUrl, texto) {
   if (!r.ok) {
     let m = ''; try { const j = await r.json(); m = (j.error && (j.error.message || j.error)) || j.message || ''; } catch (e) {}
     m = typeof m === 'string' ? m.slice(0, 160) : '';
-    throw new Error((r.status === 401 || r.status === 403 ? 'chave recusada' : r.status === 429 ? 'limite gratuito atingido' : 'erro ' + r.status) + (m ? ' (' + m + ')' : ''));
+    const e = new Error((r.status === 401 || r.status === 403 ? 'chave recusada' : r.status === 429 ? 'limite gratuito atingido' : 'erro ' + r.status) + (m ? ' (' + m + ')' : ''));
+    e.naoExiste = r.status === 404 || (r.status === 400 && /model/i.test(m));
+    throw e;
   }
   const j = await r.json(), c = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
   return typeof c === 'string' ? c : Array.isArray(c) ? c.map(x => x.text || '').join('') : '';
 }
 function extrairJSON(txt) {
-  txt = String(txt || '').replace(/```json|```/g, '');
+  txt = String(txt || '').replace(/<think>[\s\S]*?<\/think>/g, '').replace(/```json|```/g, '');
   const a = txt.indexOf('{'), b = txt.lastIndexOf('}');
   if (a < 0 || b <= a) throw new Error('A leitura voltou vazia. Tire outra foto, mais nítida e sem cortes.');
   try { return JSON.parse(txt.slice(a, b + 1)); } catch (e) { throw new Error('A resposta da leitura veio incompleta. Leia de novo.'); }
