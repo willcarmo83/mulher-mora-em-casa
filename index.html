@@ -58,6 +58,12 @@ a:focus-visible,button:focus-visible,.solta:focus-within{outline:2px solid var(-
 .nav .novo{display:flex;align-items:center;gap:8px;margin:0 6px;padding:12px 20px;border-radius:999px;background:var(--pri);color:#fff;font-weight:600;text-decoration:none}
 .marca-mob{display:flex;align-items:center;gap:8px;margin:0 0 14px;font-size:15px;font-weight:700;color:var(--pri-d)}
 .marca-mob svg{width:20px;height:20px}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--mut);text-decoration:none;white-space:nowrap}
+.sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.sync.on{color:var(--pri-d)}.sync.on::before{background:var(--pri)}
+.entrar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;border-color:var(--pri);background:var(--pri-t)}
+.entrar b{display:block}
+.txt{margin:0 0 14px;font-size:14px;color:var(--mut)}
 .topo{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
 
 @media (max-width:899.98px){
@@ -260,14 +266,18 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
     <a class="novo" href="#/novo"><svg class="i"><use href="#i-mais"/></svg>Novo pedido</a>
     <a class="it p" href="#/pedidos" data-nav="pedidos"><svg class="i"><use href="#i-lista"/></svg>Pedidos</a>
     <a class="it a" href="#/ajustes" data-nav="ajustes"><svg class="i"><use href="#i-ajustes"/></svg>Ajustes</a>
-    <small class="versao">Versão 2.2</small>
+    <small class="versao">Versão 3.0</small>
   </nav>
 
   <main class="conteudo">
     <!-- PEDIDOS -->
     <section id="t-pedidos">
       <p class="marca-mob so-mob"><svg class="i"><use href="#i-nota"/></svg>Mulher que dorme em casa</p>
-      <div class="topo"><h1>Pedidos</h1></div>
+      <div class="topo"><h1>Pedidos</h1><a class="sync" id="sync-st" href="#/ajustes">Só neste aparelho</a></div>
+      <div class="card entrar" id="sync-entrar" hidden>
+        <div><b>Veja seus pedidos em todos os aparelhos</b><small>Entre com a sua conta Google neste aparelho.</small></div>
+        <button class="btn pri" type="button" data-login>Entrar com Google</button>
+      </div>
       <div class="card stats">
         <div><small id="s-mes">Serviço no mês</small><b id="s-taxa"></b></div>
         <div><small>Compras no mês</small><b id="s-compras"></b></div>
@@ -312,7 +322,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
               <input class="vh" type="file" id="arq" accept="image/*" multiple>
             </label>
             <p style="margin:12px 0 0;text-align:center"><button class="link" id="manual" type="button">Digitar uma nota sem foto</button></p>
-            <p class="aviso" id="semchave" hidden>As notas ainda não são lidas sozinhas. Cadastre a chave gratuita em <a href="#/ajustes">Ajustes</a> para ligar a leitura automática.</p>
+            <p class="aviso" id="semchave" hidden>As notas ainda não são lidas sozinhas. Cadastre uma chave gratuita em <a href="#/ajustes">Ajustes</a> para ligar a leitura automática.</p>
           </section>
 
           <section class="card">
@@ -359,6 +369,24 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
       <div class="aj-grid">
         <div class="pilha">
           <section class="card">
+            <h2>Sincronização entre aparelhos</h2>
+            <div id="sy-a">
+              <p class="txt">Para ver os mesmos pedidos e ajustes no celular e no computador, ligue o app a um projeto gratuito do Firebase e cole aqui o bloco de configuração dele.</p>
+              <label>Configuração do Firebase<textarea id="fb-txt" spellcheck="false" placeholder="const firebaseConfig = { apiKey: &quot;...&quot;, projectId: &quot;...&quot;, appId: &quot;...&quot; }"></textarea></label>
+              <button class="btn" id="fb-ativar" type="button">Ativar sincronização</button>
+            </div>
+            <div id="sy-b" hidden>
+              <p class="txt">Sincronização ligada ao projeto <b id="sy-proj"></b>. Entre com a conta Google para ver os pedidos neste aparelho.</p>
+              <button class="btn pri" type="button" data-login>Entrar com Google</button>
+              <p style="margin:14px 0 0"><button class="link perigo" id="fb-remover" type="button">Desligar a sincronização neste aparelho</button></p>
+            </div>
+            <div id="sy-c" hidden>
+              <p class="txt">Sincronizando como <b id="sy-email"></b>. Pedidos, fotos e ajustes aparecem em todos os aparelhos em que você entrar com essa conta.</p>
+              <button class="btn" id="fb-sair" type="button">Sair desta conta</button>
+            </div>
+            <small id="sy-msg" role="status" style="display:block;margin-top:10px"></small>
+          </section>
+          <section class="card">
             <h2>Quanto você cobra</h2>
             <div class="g2">
               <label>Compras até (R$)<input id="c-limite" inputmode="decimal"></label>
@@ -383,14 +411,31 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
         </div>
         <section class="card">
           <h2>Leitura automática das notas</h2>
-          <p style="margin:0 0 14px;font-size:14px;color:var(--mut)">A leitura usa o Gemini, do Google, na faixa gratuita. Crie uma chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> e cole aqui. Ela fica guardada só neste aparelho.</p>
+          <p style="margin:0 0 14px;font-size:14px;color:var(--mut)">A leitura usa o Gemini, do Google, na faixa gratuita. Crie uma chave em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> e cole aqui. Com a sincronização ligada, a chave vale para todos os seus aparelhos.</p>
           <label>Chave do Gemini<input id="c-key" type="password" autocomplete="off" spellcheck="false"></label>
           <button class="btn" id="c-testar" type="button">Testar chave</button>
           <small id="c-status" style="display:block;margin:10px 0 14px" role="status"></small>
-          <label style="margin:0">Modelo<select id="c-model"></select></label>
+          <label>Modelo<select id="c-model"></select></label>
+          <h2 style="margin-top:22px">Leitura reserva</h2>
+          <p class="txt">Opcional. Quando o Gemini estiver fora do ar ou sem cota, o app lê a nota por este segundo serviço gratuito.</p>
+          <label>Serviço
+            <select id="c-rprov">
+              <option value="">Nenhum</option>
+              <option value="groq">Groq</option>
+              <option value="mistral">Mistral</option>
+              <option value="openrouter">OpenRouter</option>
+            </select>
+          </label>
+          <div id="r-campos" hidden>
+            <p class="txt" id="r-onde"></p>
+            <label>Chave da reserva<input id="c-rkey" type="password" autocomplete="off" spellcheck="false"></label>
+            <label>Modelo da reserva<input id="c-rmodel" autocomplete="off" spellcheck="false"></label>
+            <button class="btn" id="r-testar" type="button">Testar reserva</button>
+            <small id="r-status" style="display:block;margin-top:10px" role="status"></small>
+          </div>
         </section>
       </div>
-      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 2.2</small></p>
+      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 3.0</small></p>
     </section>
   </main>
 </div>
@@ -581,20 +626,48 @@ const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 
 const novoPedido = () => ({id: uid(), criado: hojeISO(), atualizado: Date.now(), enviadoEm: null, cliente: '', cidade: '', frete: null, taxaManual: null, obs: '', notas: []});
 const itemVazio = () => ({d: '', q: 1, u: null, t: null});
 
-let cfg = Object.assign({key: '', model: 'gemini-2.5-flash', modelos: [], limite: 1000, fixo: null, pct: null, modo: 'total', negocio: '', pix: ''}, LS.get('np-cfg', {}));
+// Para embutir a sincronização no arquivo (sem colar em cada aparelho), troque null pelo bloco de configuração do Firebase.
+const FB_FIXO = null;
+const DEV = LS.get('np-dev', null) || (() => { const d = uid(); LS.set('np-dev', d); return d; })();
+const plano = o => JSON.parse(JSON.stringify(o));
+const nao = pr => Promise.resolve(pr).catch(() => {});
+const espera = ms => new Promise(r => setTimeout(r, ms));
+let cfg = Object.assign({key: '', model: 'gemini-2.5-flash', modelos: [], rProv: '', rKey: '', rModel: '', limite: 1000, fixo: null, pct: null, modo: 'total', negocio: '', pix: ''}, LS.get('np-cfg', {}));
+let fb = FB_FIXO || LS.get('np-fb', null), fbAuth = null, fbDb = null, base = null, usuario = null;
+let authPronta = false, carregando = true, syncErro = '', ouvintes = [], vistos = new Set(), cfgPronta = false;
+
+const Local = {
+  putPedido: p => DB.put('pedidos', p.id, p),
+  delPedido: id => DB.del('pedidos', id),
+  getFoto: id => DB.get('fotos', id),
+  putFoto: (id, img) => DB.put('fotos', id, img),
+  delFoto: id => DB.del('fotos', id)
+};
+const Nuvem = {
+  putPedido: p => base.collection('pedidos').doc(p.id).set(plano(p)),
+  delPedido: id => base.collection('pedidos').doc(id).delete(),
+  async getFoto(id) { const d = await base.collection('fotos').doc(id).get(); return d.exists ? d.data().img : null; },
+  async putFoto(id, img) { return base.collection('fotos').doc(id).set({img: await caber(img)}); },
+  delFoto: id => base.collection('fotos').doc(id).delete()
+};
+let St = Local;
 let lista = [];      // todos os pedidos, sem as fotos
 let ped = null;      // pedido aberto no editor
 let pend = null;     // pedido novo, ainda não aberto
 let avisouDB = false;
-const salvarCfg = () => LS.set('np-cfg', cfg);
+let cfgT;
+function salvarCfg() {
+  LS.set('np-cfg', cfg);
+  if (St === Nuvem && base) { clearTimeout(cfgT); cfgT = setTimeout(() => nao(base.collection('cfg').doc('app').set(plano(cfg))), 500); }
+}
 
 let toastT;
-function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 4000); }
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), Math.max(4000, m.length * 70)); }
 function falhaDB() { if (!avisouDB) { avisouDB = true; toast('Este navegador não deixou guardar os pedidos no aparelho. Baixe o PDF antes de fechar a página.'); } }
 
 // ---------- gravação ----------
 function limpo(p) {
-  return {id: p.id, criado: p.criado, atualizado: p.atualizado, enviadoEm: p.enviadoEm, cliente: p.cliente, cidade: p.cidade,
+  return {id: p.id, dev: DEV, criado: p.criado, atualizado: p.atualizado, enviadoEm: p.enviadoEm, cliente: p.cliente, cidade: p.cidade,
     frete: p.frete, taxaManual: p.taxaManual, obs: p.obs, tot: totais(cfg, p),
     notas: p.notas.map(n => { const c = Object.assign({}, n); delete c.img; c.itens = n.itens.map(i => Object.assign({}, i)); return c; })};
 }
@@ -605,8 +678,12 @@ async function gravar(p) {
   const s = limpo(p), i = lista.findIndex(x => x.id === p.id);
   if (i >= 0) lista[i] = s; else lista.unshift(s);
   p._gravado = true;
-  try { await DB.put('pedidos', p.id, s); if (p === ped) $('#ed-salvo').textContent = 'Salvo neste aparelho'; }
-  catch (e) { falhaDB(); }
+  const dito = t => { if (p === ped) $('#ed-salvo').textContent = t; };
+  try {
+    const pr = St.putPedido(s);
+    if (St === Nuvem) { dito('Salvo. Sincronizando…'); pr.then(() => dito('Sincronizado'), () => dito('Salvo neste aparelho; a sincronização falhou')); }
+    else { await pr; dito('Salvo neste aparelho'); }
+  } catch (e) { falhaDB(); }
 }
 let salvarT;
 function salvar() {
@@ -641,14 +718,17 @@ async function abrir(id) {
   const m = lista.find(p => p.id === id);
   if (m) { ped = JSON.parse(JSON.stringify(m)); ped._gravado = true; }
   else if (pend && pend.id === id) ped = pend;
+  else if (carregando) { renderLista(); mostrar('pedidos'); return; }
   else { location.replace('#/pedidos'); return; }
   pend = null;
   ped.notas.forEach(n => { if (n.status === 'lendo') { n.status = 'erro'; n.erro = 'A leitura foi interrompida.'; if (!n.itens.length) n.itens.push(itemVazio()); } });
   mostrar('editor'); renderEditor();
-  const atual = ped;
+  carregarFotos(ped);
+}
+async function carregarFotos(atual) {
   for (const n of atual.notas) {
     if (n.img || !n.temFoto) continue;
-    try { n.img = await DB.get('fotos', n.id); } catch (e) {}
+    try { n.img = await St.getFoto(n.id); } catch (e) {}
     if (ped === atual && n.img) trocaNota(n);
   }
 }
@@ -661,6 +741,7 @@ function renderLista() {
   $('#s-compras').textContent = money(doMes.reduce((s, p) => s + ((p.tot && p.tot.compras) || 0), 0));
   $('#s-n').textContent = doMes.length;
   $('#csv').disabled = !lista.length;
+  if (carregando) { $('#lista').innerHTML = '<p class="vazio">Carregando pedidos…</p>'; return; }
   const q = norm($('#busca').value);
   const l = lista.filter(p => !q || norm(p.cliente + ' ' + p.cidade).includes(q)).sort((a, b) => (b.atualizado || 0) - (a.atualizado || 0));
   if (!lista.length) { $('#lista').innerHTML = '<p class="vazio">Nenhum pedido ainda.<br>Toque em "Novo pedido" e fotografe a primeira nota.</p>'; return; }
@@ -681,7 +762,7 @@ function renderLista() {
 $('#busca').addEventListener('input', renderLista);
 async function excluirPedido(id, notas) {
   lista = lista.filter(x => x.id !== id);
-  try { await DB.del('pedidos', id); for (const n of notas || []) await DB.del('fotos', n.id); } catch (e) {}
+  nao(St.delPedido(id)); (notas || []).forEach(n => nao(St.delFoto(n.id)));
 }
 $('#lista').addEventListener('click', async e => {
   const b = e.target.closest('[data-del]'); if (!b) return;
@@ -709,7 +790,7 @@ function renderEditor() {
   $('#cliente').value = ped.cliente; $('#cidade').value = ped.cidade; $('#obs').value = ped.obs;
   $('#frete').value = ped.frete != null ? dec(ped.frete) : '';
   $('#taxa').value = ped.taxaManual != null ? dec(ped.taxaManual) : '';
-  $('#ed-salvo').textContent = ped._gravado ? 'Salvo neste aparelho' : '';
+  $('#ed-salvo').textContent = ped._gravado ? (St === Nuvem ? 'Sincronizado' : 'Salvo neste aparelho') : '';
   renderCab(); renderNotas();
 }
 function renderCab() {
@@ -771,7 +852,7 @@ function renderResumo() {
     info.innerHTML = t.auto == null ? 'Para o serviço ser calculado sozinho, informe quanto você cobra em <a href="#/ajustes">Ajustes</a>.'
       : 'Serviço calculado pela sua regra. Digite outro valor se combinou diferente.';
   }
-  $('#semchave').hidden = !!cfg.key;
+  $('#semchave').hidden = !!(cfg.key || (cfg.rProv && cfg.rKey));
 }
 
 const acharNota = el => { const a = el.closest('.nota'); return a && ped && ped.notas.find(n => n.id === a.dataset.n); };
@@ -799,21 +880,34 @@ $('#notas').addEventListener('click', e => {
   if (act === 'delitem') { n.itens.splice(+b.closest('.item').dataset.i, 1); trocaNota(n); }
   if (act === 'delnota') {
     if (!confirm('Remover esta nota do pedido?')) return;
-    ped.notas = ped.notas.filter(x => x !== n); DB.del('fotos', n.id).catch(() => {}); renderNotas();
+    ped.notas = ped.notas.filter(x => x !== n); nao(St.delFoto(n.id)); renderNotas();
   }
   salvar();
 });
 $('#zoom').addEventListener('click', () => $('#zoom').close());
 
+// Cada foto precisa caber em um documento do banco (1 MB); reduz qualidade e tamanho até caber.
+const LIM_FOTO = 900000;
+function comprimir(im) {
+  let lado = 1600, q = .82, out;
+  for (let i = 0; i < 9; i++) {
+    const k = Math.min(1, lado / Math.max(im.width, im.height)), w = Math.round(im.width * k), h = Math.round(im.height * k);
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
+    out = {img: c.toDataURL('image/jpeg', q), w, h};
+    if (out.img.length <= LIM_FOTO) break;
+    if (q > .6) q -= .1; else lado = Math.round(lado * .85);
+  }
+  return out;
+}
+function caber(img) {
+  if (!img || img.length <= LIM_FOTO) return Promise.resolve(img);
+  return new Promise(res => { const im = new Image(); im.onload = () => res(comprimir(im).img); im.onerror = () => res(img); im.src = img; });
+}
 function resize(file) {
   return new Promise((res, rej) => {
     const url = URL.createObjectURL(file), im = new Image();
-    im.onload = () => {
-      const k = Math.min(1, 1600 / Math.max(im.width, im.height)), w = Math.round(im.width * k), h = Math.round(im.height * k);
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
-      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(im, 0, 0, w, h);
-      URL.revokeObjectURL(url); res({img: c.toDataURL('image/jpeg', .82), w, h});
-    };
+    im.onload = () => { const r = comprimir(im); URL.revokeObjectURL(url); res(r); };
     im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); };
     im.src = url;
   });
@@ -829,10 +923,10 @@ async function adicionarFotos(files) {
     let r;
     try { r = await resize(f); } catch (err) { toast('Não foi possível abrir "' + f.name + '". Envie uma foto em JPG ou PNG.'); continue; }
     const n = novaNota(r); n.temFoto = true;
-    DB.put('fotos', n.id, n.img).catch(falhaDB);
+    Promise.resolve(St.putFoto(n.id, n.img)).catch(() => { if (St === Local) falhaDB(); });
     dono.notas.push(n);
     if (ped === dono) { renderNotas(); salvar(); } else gravar(dono);
-    if (cfg.key) await lerNota(n, dono);
+    if (cfg.key || (cfg.rProv && cfg.rKey)) await lerNota(n, dono);
     else {
       n.status = 'erro'; n.erro = 'Falta a chave do Gemini para ler esta nota. Cadastre em Ajustes e depois toque em'; n.itens.push(itemVazio());
       if (ped === dono) { trocaNota(n); salvar(); }
@@ -902,36 +996,79 @@ function candidatos() {
   const l = [cfg.model].concat(cfg.modelos || [], ['gemini-flash-latest', 'gemini-flash-lite-latest']);
   return l.filter((m, i) => m && l.indexOf(m) === i).slice(0, 8);
 }
-// Tenta o modelo escolhido e, se ele não existir ou estiver sem cota, passa para o próximo da lista.
-async function gerar(body) {
+const INSTAVEL = [404, 429, 500, 502, 503, 504];
+// Tenta o modelo escolhido; se ele não existir, estiver sem cota ou sobrecarregado, passa para o próximo
+// e, se todos falharem por sobrecarga, espera um pouco e repete.
+async function gerar(body, aviso) {
   let ult;
-  for (const m of candidatos()) {
-    const r = await pedir(m, body);
-    if (r.ok) { if (m !== cfg.model) { cfg.model = m; salvarCfg(); preencherModelos(); } return r.j; }
-    ult = r;
-    if (r.st !== 404 && r.st !== 429) break;
+  const rodadas = cfg.rProv && cfg.rKey ? 2 : 3;
+  for (let rodada = 0; rodada < rodadas; rodada++) {
+    if (rodada) { if (aviso) aviso('O serviço de leitura está ocupado. Tentando de novo…'); await espera(rodada === 1 ? 2500 : 6000); }
+    for (const m of candidatos().slice(0, rodada ? 4 : 8)) {
+      const r = await pedir(m, body);
+      if (r.ok) { if (m !== cfg.model) { cfg.model = m; salvarCfg(); preencherModelos(); } return r.j; }
+      ult = r;
+      if (!INSTAVEL.includes(r.st)) throw new Error(erroApi(r.st, r.m));
+    }
+    if (ult.st === 404) break;
   }
   throw new Error(erroApi(ult.st, ult.m));
 }
-async function gemini(dataUrl) {
+async function gemini(dataUrl, aviso) {
   const j = await gerar({
     contents: [{parts: [{inline_data: {mime_type: 'image/jpeg', data: dataUrl.split(',')[1]}}, {text: PROMPT}]}],
     generationConfig: {temperature: 0, responseMimeType: 'application/json'}
-  });
+  }, aviso);
   const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-  const txt = parts.filter(p => !p.thought && p.text).map(p => p.text).join('');
-  if (!txt) throw new Error('A leitura voltou vazia. Tire outra foto, mais nítida e sem cortes.');
-  try { return JSON.parse(txt.replace(/```json|```/g, '').trim()); }
-  catch (e) { throw new Error('A resposta da leitura veio incompleta. Leia de novo.'); }
+  return parts.filter(p => !p.thought && p.text).map(p => p.text).join('');
+}
+// Serviços de reserva, todos no formato "chat completions".
+const RES = {
+  groq: {nome: 'Groq', url: 'https://api.groq.com/openai/v1/chat/completions', modelo: 'meta-llama/llama-4-scout-17b-16e-instruct', onde: 'console.groq.com/keys', json: true},
+  mistral: {nome: 'Mistral', url: 'https://api.mistral.ai/v1/chat/completions', modelo: 'mistral-small-latest', onde: 'console.mistral.ai', json: true},
+  openrouter: {nome: 'OpenRouter', url: 'https://openrouter.ai/api/v1/chat/completions', modelo: 'openrouter/free', onde: 'openrouter.ai/keys', json: false}
+};
+async function reserva(dataUrl, texto) {
+  const P = RES[cfg.rProv]; let r;
+  const body = {model: cfg.rModel || P.modelo, temperature: 0,
+    messages: [{role: 'user', content: [{type: 'text', text: texto || PROMPT}, {type: 'image_url', image_url: {url: dataUrl}}]}]};
+  if (P.json && !texto) body.response_format = {type: 'json_object'};
+  try { r = await fetch(P.url, {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.rKey}, body: JSON.stringify(body)}); }
+  catch (e) { throw new Error('sem conexão com a ' + P.nome + ', ou ela não aceita chamadas feitas pelo navegador'); }
+  if (!r.ok) {
+    let m = ''; try { const j = await r.json(); m = (j.error && (j.error.message || j.error)) || j.message || ''; } catch (e) {}
+    m = typeof m === 'string' ? m.slice(0, 160) : '';
+    throw new Error((r.status === 401 || r.status === 403 ? 'chave recusada' : r.status === 429 ? 'limite gratuito atingido' : 'erro ' + r.status) + (m ? ' (' + m + ')' : ''));
+  }
+  const j = await r.json(), c = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+  return typeof c === 'string' ? c : Array.isArray(c) ? c.map(x => x.text || '').join('') : '';
+}
+function extrairJSON(txt) {
+  txt = String(txt || '').replace(/```json|```/g, '');
+  const a = txt.indexOf('{'), b = txt.lastIndexOf('}');
+  if (a < 0 || b <= a) throw new Error('A leitura voltou vazia. Tire outra foto, mais nítida e sem cortes.');
+  try { return JSON.parse(txt.slice(a, b + 1)); } catch (e) { throw new Error('A resposta da leitura veio incompleta. Leia de novo.'); }
+}
+// Lê pelo Gemini e, se ele falhar, pela reserva.
+async function lerImagem(img, aviso) {
+  const temRes = !!(cfg.rProv && cfg.rKey && RES[cfg.rProv]);
+  let erro = null;
+  if (cfg.key) { try { return extrairJSON(await gemini(img, aviso)); } catch (e) { erro = e; } }
+  if (temRes) {
+    if (aviso && erro) aviso('O Gemini não respondeu. Lendo pela ' + RES[cfg.rProv].nome + '…');
+    try { return extrairJSON(await reserva(img)); }
+    catch (e) { throw new Error((erro ? erro.message + ' ' : '') + 'A leitura reserva também falhou: ' + e.message + '.'); }
+  }
+  throw erro || new Error('Falta a chave do Gemini para ler esta nota. Cadastre em Ajustes e depois toque em');
 }
 async function lerNota(n, dono) {
   dono = dono || ped;
   const mostra = () => { if (ped === dono) trocaNota(n); };
   n.status = 'lendo'; mostra();
   try {
-    if (!cfg.key) throw new Error('Falta a chave do Gemini para ler esta nota. Cadastre em Ajustes e depois toque em');
-    if (!n.img) throw new Error('A foto desta nota não está mais guardada neste aparelho.');
-    const j = await gemini(n.img);
+    if (!n.img) throw new Error('A foto desta nota ainda não foi carregada. Espere a miniatura aparecer e toque em');
+    const aviso = t => { const el = document.querySelector('.nota[data-n="' + n.id + '"] .lendo'); if (el && ped === dono) el.textContent = t; };
+    const j = await lerImagem(n.img, aviso);
     const itens = (Array.isArray(j.itens) ? j.itens : []).map(i => {
       let q = parseBR(i.quantidade), u = parseBR(i.valor_unitario), t = parseBR(i.valor_total);
       if (q == null) q = 1;
@@ -1013,9 +1150,30 @@ function preencherCfg() {
   $('#c-fixo').value = cfg.fixo != null ? dec(cfg.fixo) : '';
   $('#c-pct').value = cfg.pct != null ? qtd(cfg.pct) : '';
   $('#c-modo').value = cfg.modo; $('#c-negocio').value = cfg.negocio; $('#c-pix').value = cfg.pix; $('#c-key').value = cfg.key;
-  preencherModelos(); exemplo();
+  $('#c-rprov').value = RES[cfg.rProv] ? cfg.rProv : ''; $('#c-rkey').value = cfg.rKey || ''; $('#c-rmodel').value = cfg.rModel || '';
+  preencherModelos(); exemplo(); mostrarReserva(); renderSync();
 }
-[['c-limite', 'limite', 1], ['c-fixo', 'fixo', 1], ['c-pct', 'pct', 1], ['c-modo', 'modo', 0], ['c-negocio', 'negocio', 0], ['c-pix', 'pix', 0], ['c-key', 'key', 0], ['c-model', 'model', 0]].forEach(([id, k, numero]) => {
+function mostrarReserva() {
+  const P = RES[cfg.rProv];
+  $('#r-campos').hidden = !P;
+  if (P) $('#r-onde').innerHTML = 'Crie uma chave gratuita da ' + P.nome + ' em <a href="https://' + P.onde + '" target="_blank" rel="noopener">' + P.onde + '</a> e cole abaixo.';
+}
+$('#c-rprov').addEventListener('change', e => {
+  cfg.rProv = e.target.value; cfg.rModel = RES[cfg.rProv] ? RES[cfg.rProv].modelo : ''; $('#c-rmodel').value = cfg.rModel;
+  $('#r-status').textContent = ''; salvarCfg(); mostrarReserva();
+});
+$('#r-testar').addEventListener('click', async () => {
+  const st = $('#r-status');
+  if (!cfg.rKey) { st.textContent = 'Cole a chave da reserva antes de testar.'; return; }
+  st.textContent = 'Testando com uma imagem pequena…';
+  const c = document.createElement('canvas'); c.width = 240; c.height = 80;
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 240, 80); x.fillStyle = '#000'; x.font = '28px sans-serif'; x.fillText('TOTAL 12,34', 20, 50);
+  try {
+    const t = await reserva(c.toDataURL('image/jpeg', .9), 'Qual valor aparece na imagem? Responda só com o número.');
+    st.textContent = /12[.,]34/.test(t) ? 'Reserva funcionando: a imagem de teste foi lida certo.' : 'A reserva respondeu, mas não leu a imagem de teste (resposta: "' + t.slice(0, 60) + '"). Escolha um modelo que aceite imagem.';
+  } catch (e) { st.textContent = 'A reserva falhou: ' + e.message + '.'; }
+});
+[['c-limite', 'limite', 1], ['c-fixo', 'fixo', 1], ['c-pct', 'pct', 1], ['c-modo', 'modo', 0], ['c-negocio', 'negocio', 0], ['c-pix', 'pix', 0], ['c-key', 'key', 0], ['c-model', 'model', 0], ['c-rkey', 'rKey', 0], ['c-rmodel', 'rModel', 0]].forEach(([id, k, numero]) => {
   $('#' + id).addEventListener('input', e => { cfg[k] = numero ? parseBR(e.target.value) : e.target.value.trim(); salvarCfg(); exemplo(); });
 });
 $('#c-testar').addEventListener('click', async () => {
@@ -1036,7 +1194,7 @@ $('#c-testar').addEventListener('click', async () => {
     cfg.modelos = l; if (!l.includes(cfg.model)) cfg.model = l[0];
     salvarCfg(); preencherModelos();
     st.textContent = 'Chave aceita. Procurando um modelo que responda…';
-    await gerar({contents: [{parts: [{text: 'Responda apenas: ok'}]}]});
+    await gerar({contents: [{parts: [{text: 'Responda apenas: ok'}]}]}, t => { st.textContent = t; });
     st.textContent = 'Chave funcionando. Modelo em uso: ' + cfg.model + '.';
   } catch (e) { st.textContent = e.message; }
 });
@@ -1060,11 +1218,141 @@ async function migrar() {
   await DB.put('kv', 'migrado2', true);
 }
 
+// ---------- sincronização (Firebase) ----------
+function lerConfigFB(txt) {
+  const o = {};
+  ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'].forEach(k => {
+    const m = new RegExp(k + '["\']?\\s*:\\s*["\']([^"\']+)["\']').exec(txt); if (m) o[k] = m[1];
+  });
+  if (!o.apiKey || !o.projectId || !o.appId) return null;
+  if (!o.authDomain) o.authDomain = o.projectId + '.firebaseapp.com';
+  return o;
+}
+function renderSync() {
+  const st = $('#sync-st');
+  st.className = 'sync' + (usuario ? ' on' : ''); st.textContent = usuario ? 'Sincronizado' : 'Só neste aparelho';
+  $('#sync-entrar').hidden = !(fbAuth && authPronta && !usuario);
+  document.querySelectorAll('[data-login]').forEach(b => { b.disabled = !!fb && !authPronta && !syncErro; b.textContent = b.disabled ? 'Carregando…' : 'Entrar com Google'; });
+  $('#sy-a').hidden = !!fb; $('#sy-b').hidden = !(fb && !usuario); $('#sy-c').hidden = !usuario;
+  if (fb) $('#sy-proj').textContent = fb.projectId;
+  if (usuario) $('#sy-email').textContent = usuario.email || 'sua conta Google';
+  $('#fb-remover').hidden = !!FB_FIXO;
+  $('#sy-msg').textContent = syncErro;
+}
+$('#fb-ativar').addEventListener('click', () => {
+  const c = lerConfigFB($('#fb-txt').value);
+  if (!c) { syncErro = 'Não reconheci a configuração. Copie o bloco inteiro "firebaseConfig" mostrado pelo Firebase, com apiKey, projectId e appId.'; renderSync(); return; }
+  LS.set('np-fb', c); location.reload();
+});
+$('#fb-remover').addEventListener('click', () => {
+  if (!confirm('Desligar a sincronização neste aparelho? Os pedidos da conta continuam guardados na nuvem.')) return;
+  try { localStorage.removeItem('np-fb'); } catch (e) {} location.reload();
+});
+$('#fb-sair').addEventListener('click', () => { if (fbAuth) fbAuth.signOut(); });
+document.addEventListener('click', e => { if (e.target.closest('[data-login]')) entrar(); });
+async function entrar() {
+  if (!fbAuth) { toast(syncErro || 'A sincronização ainda está carregando. Tente em alguns segundos.'); return; }
+  try { await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  catch (e) {
+    const c = (e && e.code) || '';
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+    toast(c === 'auth/unauthorized-domain' ? 'Este endereço não está autorizado no Firebase. Em Authentication, Settings, Authorized domains, adicione ' + location.hostname + '.'
+      : c === 'auth/operation-not-allowed' ? 'O login com Google não está ativado no Firebase. Ative em Authentication, Sign-in method.'
+      : c === 'auth/popup-blocked' ? 'O navegador bloqueou a janela de login. Permita pop-ups para este site e tente de novo.'
+      : 'Não foi possível entrar. ' + ((e && e.message) || ''));
+  }
+}
+function script(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('sdk')); document.head.appendChild(s); });
+}
+const FBV = 'https://www.gstatic.com/firebasejs/10.12.2/';
+
+// Envia para a conta os pedidos que estavam guardados só neste aparelho.
+async function subirLocais() {
+  let loc = [];
+  try { loc = (await DB.all('pedidos')) || []; } catch (e) { return; }
+  if (!loc.length) return;
+  toast('Enviando ' + pl(loc.length, 'pedido', 'pedidos') + ' deste aparelho para a sua conta…');
+  const envio = (async () => {
+    for (const p of loc) {
+      for (const n of p.notas) { if (!n.temFoto) continue; const img = await DB.get('fotos', n.id); if (img) await Nuvem.putFoto(n.id, img); }
+      await Nuvem.putPedido(Object.assign({}, p, {dev: DEV}));
+    }
+    for (const p of loc) { for (const n of p.notas) await DB.del('fotos', n.id); await DB.del('pedidos', p.id); }
+    return true;
+  })();
+  const ok = await Promise.race([envio.catch(() => false), espera(25000).then(() => false)]);
+  if (!ok) toast('Não deu para enviar agora os pedidos guardados neste aparelho. Eles continuam aqui e serão enviados na próxima vez.');
+}
+// Outro aparelho mudou ou excluiu o pedido que está aberto aqui.
+function remoto() {
+  if (!ped) return;
+  const r = lista.find(x => x.id === ped.id);
+  if (r) {
+    if (r.dev === DEV || (r.atualizado || 0) <= (ped.atualizado || 0)) return;
+    const imgs = {}; ped.notas.forEach(n => { if (n.img) imgs[n.id] = n.img; });
+    clearTimeout(salvarT); ped = plano(r); ped._gravado = true;
+    ped.notas.forEach(n => { if (imgs[n.id]) n.img = imgs[n.id]; });
+    renderEditor(); carregarFotos(ped); toast('Pedido atualizado com as mudanças feitas em outro aparelho.');
+  } else if (vistos.has(ped.id)) {
+    ped._apagado = true; clearTimeout(salvarT); ped = null;
+    location.hash = '#/pedidos'; toast('Este pedido foi excluído em outro aparelho.');
+  }
+}
+function cfgRemota(d) {
+  if (d.metadata && d.metadata.hasPendingWrites) return;
+  const r = d.exists ? d.data() : {};
+  if (!cfgPronta) {
+    // Primeira vez neste aparelho: o que já está na conta vale, e o que só existe aqui é enviado.
+    cfgPronta = true;
+    const m = Object.assign({}, cfg);
+    Object.keys(r).forEach(k => { const v = r[k]; if (v !== null && v !== '' && !(Array.isArray(v) && !v.length)) m[k] = v; });
+    cfg = m; LS.set('np-cfg', cfg);
+    if (JSON.stringify(plano(cfg)) !== JSON.stringify(r)) nao(base.collection('cfg').doc('app').set(plano(cfg)));
+  } else { cfg = Object.assign({}, cfg, r); LS.set('np-cfg', cfg); }
+  const foco = document.activeElement;
+  if (document.body.dataset.tela === 'ajustes' && !(foco && foco.closest && foco.closest('#t-ajustes input, #t-ajustes select, #t-ajustes textarea'))) preencherCfg();
+  if (ped) renderResumo();
+}
+async function usarLocal() {
+  St = Local; base = null;
+  try { lista = (await DB.all('pedidos')) || []; } catch (e) { lista = []; falhaDB(); }
+  carregando = false; renderSync(); rota();
+}
+async function trocarConta(u) {
+  await sair();
+  ouvintes.forEach(f => f()); ouvintes = []; vistos = new Set(); cfgPronta = false;
+  usuario = u; authPronta = true;
+  if (!u) { await usarLocal(); return; }
+  St = Nuvem; base = fbDb.collection('users').doc(u.uid); carregando = true; lista = [];
+  renderSync(); if (document.body.dataset.tela === 'pedidos') renderLista();
+  await subirLocais();
+  ouvintes.push(base.collection('pedidos').onSnapshot(s => {
+    lista = s.docs.map(d => d.data());
+    const primeira = carregando; carregando = false;
+    remoto(); s.docs.forEach(d => vistos.add(d.id));
+    if (primeira) rota(); else if (document.body.dataset.tela === 'pedidos') renderLista();
+  }, () => {
+    carregando = false; renderLista();
+    toast('O Firebase recusou o acesso aos pedidos. Confira se o banco Firestore foi criado e se as regras de segurança foram publicadas.');
+  }));
+  ouvintes.push(base.collection('cfg').doc('app').onSnapshot(cfgRemota, () => {}));
+}
+
 // ---------- início ----------
 (async function () {
-  try { await migrar(); lista = (await DB.all('pedidos')) || []; }
-  catch (e) { lista = []; falhaDB(); }
-  rota();
+  renderSync(); rota();
+  try { await migrar(); } catch (e) {}
+  if (fb) {
+    try {
+      await script(FBV + 'firebase-app-compat.js'); await script(FBV + 'firebase-auth-compat.js'); await script(FBV + 'firebase-firestore-compat.js');
+      firebase.initializeApp(fb); fbAuth = firebase.auth(); fbDb = firebase.firestore();
+      try { await fbDb.enablePersistence({synchronizeTabs: true}); } catch (e) {}
+      fbAuth.onAuthStateChanged(u => { trocarConta(u).catch(() => {}); });
+      return;
+    } catch (e) { fbAuth = null; syncErro = 'Não foi possível carregar a sincronização. Confira a internet e recarregue a página.'; }
+  }
+  await usarLocal();
 })();
 </script>
 </body>
