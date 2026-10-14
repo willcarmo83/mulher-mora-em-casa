@@ -61,6 +61,17 @@ a:focus-visible,button:focus-visible,.solta:focus-within{outline:2px solid var(-
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--mut);text-decoration:none;white-space:nowrap}
 .sync::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mut)}
 .sync.on{color:var(--pri-d)}.sync.on::before{background:var(--pri)}
+.sync.erro{color:var(--per)}.sync.erro::before{background:var(--per)}
+.negado{margin-bottom:16px;border-color:var(--per);background:var(--per-t)}
+.negado b{display:block;margin-bottom:4px}
+.negado p{margin:0 0 12px;font-size:14px}
+.negado .acoes{display:flex;flex-wrap:wrap;gap:10px}
+.conta{display:none}
+@media (min-width:900px){
+  .nav .conta{display:block;order:8;margin:auto 6px 0;padding-top:14px;border-top:1px solid var(--bd);font-size:13px;color:var(--mut);overflow-wrap:anywhere}
+  .nav .conta b{display:block;color:var(--tx);font-weight:600;margin-bottom:2px}
+  .nav .conta:not([hidden])~.versao{margin:10px 6px 0}
+}
 .entrar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;border-color:var(--pri);background:var(--pri-t)}
 .entrar b{display:block}
 .txt{margin:0 0 14px;font-size:14px;color:var(--mut)}
@@ -266,7 +277,8 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
     <a class="novo" href="#/novo"><svg class="i"><use href="#i-mais"/></svg>Novo pedido</a>
     <a class="it p" href="#/pedidos" data-nav="pedidos"><svg class="i"><use href="#i-lista"/></svg>Pedidos</a>
     <a class="it a" href="#/ajustes" data-nav="ajustes"><svg class="i"><use href="#i-ajustes"/></svg>Ajustes</a>
-    <small class="versao">Versão 3.3</small>
+    <div class="conta" id="nav-conta" hidden><b>Conectado como</b><span id="nav-email"></span><br><button class="link" type="button" data-sair>Sair</button></div>
+    <small class="versao">Versão 3.4</small>
   </nav>
 
   <main class="conteudo">
@@ -274,6 +286,11 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
     <section id="t-pedidos">
       <p class="marca-mob so-mob"><svg class="i"><use href="#i-nota"/></svg>Mulher que dorme em casa</p>
       <div class="topo"><h1>Pedidos</h1><a class="sync" id="sync-st" href="#/ajustes">Só neste aparelho</a></div>
+      <div class="card negado" id="sync-negado" hidden role="alert">
+        <b>Esta conta não tem permissão para guardar pedidos</b>
+        <p>Você entrou como <strong id="neg-email"></strong>, mas as regras do Firebase não liberam este e-mail. Nada do que for feito com esta conta é guardado. Inclua este e-mail nas regras e toque em "Tentar de novo", ou saia e entre com a conta certa.</p>
+        <div class="acoes"><button class="btn pri" type="button" id="neg-tentar">Tentar de novo</button><button class="btn" type="button" data-sair>Sair e entrar com outra conta</button></div>
+      </div>
       <div class="card entrar" id="sync-entrar" hidden>
         <div><b>Veja seus pedidos em todos os aparelhos</b><small>Entre com a sua conta Google neste aparelho.</small></div>
         <button class="btn pri" type="button" data-login>Entrar com Google</button>
@@ -382,7 +399,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
             </div>
             <div id="sy-c" hidden>
               <p class="txt">Sincronizando como <b id="sy-email"></b>. Pedidos, fotos e ajustes aparecem em todos os aparelhos em que você entrar com essa conta.</p>
-              <button class="btn" id="fb-sair" type="button">Sair desta conta</button>
+              <button class="btn" id="fb-sair" type="button" data-sair>Sair desta conta</button>
             </div>
             <small id="sy-msg" role="status" style="display:block;margin-top:10px"></small>
           </section>
@@ -435,7 +452,7 @@ dialog::backdrop{background:rgba(22,32,28,.55)}
           </div>
         </section>
       </div>
-      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 3.3</small></p>
+      <p class="so-mob" style="text-align:center;margin:20px 0 0"><small>Versão 3.4</small></p>
     </section>
   </main>
 </div>
@@ -641,7 +658,7 @@ const nao = pr => Promise.resolve(pr).catch(() => {});
 const espera = ms => new Promise(r => setTimeout(r, ms));
 let cfg = Object.assign({key: '', model: 'gemini-2.5-flash', modelos: [], rProv: '', rKey: '', rModel: '', limite: 1000, fixo: null, pct: null, modo: 'total', negocio: '', pix: ''}, LS.get('np-cfg', {}));
 let fb = FB_FIXO || LS.get('np-fb', null), fbAuth = null, fbDb = null, base = null, usuario = null;
-let authPronta = false, carregando = true, syncErro = '', ouvintes = [], vistos = new Set(), cfgPronta = false;
+let semAcesso = false, authPronta = false, carregando = true, syncErro = '', ouvintes = [], vistos = new Set(), cfgPronta = false;
 
 const Local = {
   putPedido: p => DB.put('pedidos', p.id, p),
@@ -688,7 +705,10 @@ async function gravar(p) {
   const dito = t => { if (p === ped) $('#ed-salvo').textContent = t; };
   try {
     const pr = St.putPedido(s);
-    if (St === Nuvem) { dito('Salvo. Sincronizando…'); pr.then(() => dito('Sincronizado'), () => dito('Salvo neste aparelho; a sincronização falhou')); }
+    if (St === Nuvem) { dito('Salvo. Sincronizando…'); pr.then(() => dito('Sincronizado'), e => {
+      if (e && e.code === 'permission-denied') { semAcesso = true; renderSync(); dito('Não foi guardado: esta conta não tem permissão'); toast('Esta conta não tem permissão para guardar pedidos. O que for feito aqui não fica salvo.'); }
+      else dito('Ainda não sincronizado. Será enviado quando a conexão voltar');
+    }); }
     else { await pr; dito('Salvo neste aparelho'); }
   } catch (e) { falhaDB(); }
 }
@@ -711,7 +731,10 @@ function mostrar(tela) {
 }
 async function rota() {
   const [a, b] = location.hash.replace(/^#\/?/, '').split('/');
-  if (a === 'novo') { pend = novoPedido(); location.replace('#/pedido/' + pend.id); return; }
+  if (a === 'novo') {
+    if (semAcesso) { toast('Esta conta não tem permissão para guardar pedidos. Saia e entre com a conta certa.'); location.replace('#/pedidos'); return; }
+    pend = novoPedido(); location.replace('#/pedido/' + pend.id); return;
+  }
   if (a === 'pedido' && b) return abrir(b);
   await sair();
   if (a === 'ajustes') { preencherCfg(); mostrar('ajustes'); }
@@ -1262,7 +1285,11 @@ function lerConfigFB(txt) {
 }
 function renderSync() {
   const st = $('#sync-st');
-  st.className = 'sync' + (usuario ? ' on' : ''); st.textContent = usuario ? 'Sincronizado' : 'Só neste aparelho';
+  st.className = 'sync' + (usuario ? (semAcesso ? ' erro' : ' on') : ''); st.textContent = usuario ? (semAcesso ? 'Sem acesso' : 'Sincronizado') : 'Só neste aparelho';
+  $('#sync-negado').hidden = !(usuario && semAcesso);
+  if (usuario) $('#neg-email').textContent = usuario.email || 'esta conta';
+  $('#nav-conta').hidden = !usuario;
+  if (usuario) $('#nav-email').textContent = usuario.email || 'sua conta Google';
   $('#sync-entrar').hidden = !(fbAuth && authPronta && !usuario);
   document.querySelectorAll('[data-login]').forEach(b => { b.disabled = !!fb && !authPronta && !syncErro; b.textContent = b.disabled ? 'Carregando…' : 'Entrar com Google'; });
   $('#sy-a').hidden = !!fb; $('#sy-b').hidden = !(fb && !usuario); $('#sy-c').hidden = !usuario;
@@ -1280,7 +1307,8 @@ $('#fb-remover').addEventListener('click', () => {
   if (!confirm('Desligar a sincronização neste aparelho? Os pedidos da conta continuam guardados na nuvem.')) return;
   try { localStorage.removeItem('np-fb'); } catch (e) {} location.reload();
 });
-$('#fb-sair').addEventListener('click', () => { if (fbAuth) fbAuth.signOut(); });
+document.addEventListener('click', e => { if (e.target.closest('[data-sair]') && fbAuth) fbAuth.signOut(); });
+$('#neg-tentar').addEventListener('click', () => { if (usuario) { toast('Tentando de novo…'); trocarConta(usuario).catch(() => {}); } });
 document.addEventListener('click', e => { if (e.target.closest('[data-login]')) entrar(); });
 async function entrar() {
   if (!fbAuth) { toast(syncErro || 'A sincronização ainda está carregando. Tente em alguns segundos.'); return; }
@@ -1352,8 +1380,10 @@ async function usarLocal() {
   carregando = false; renderSync(); rota();
 }
 async function trocarConta(u) {
+  // Um pedido novo, aberto antes do login terminar, continua aberto depois da troca.
+  if (ped && !ped._gravado && !ped._apagado) pend = ped;
   await sair();
-  ouvintes.forEach(f => f()); ouvintes = []; vistos = new Set(); cfgPronta = false;
+  ouvintes.forEach(f => f()); ouvintes = []; vistos = new Set(); cfgPronta = false; semAcesso = false;
   usuario = u; authPronta = true;
   if (!u) { await usarLocal(); return; }
   St = Nuvem; base = fbDb.collection('users').doc(u.uid); carregando = true; lista = [];
@@ -1364,9 +1394,13 @@ async function trocarConta(u) {
     const primeira = carregando; carregando = false;
     remoto(); s.docs.forEach(d => vistos.add(d.id));
     if (primeira) rota(); else if (document.body.dataset.tela === 'pedidos') renderLista();
-  }, () => {
-    carregando = false; renderLista();
-    toast('O Firebase recusou o acesso aos pedidos. Confira se o banco Firestore foi criado e se as regras de segurança foram publicadas.');
+  }, e => {
+    carregando = false; lista = [];
+    if (e && e.code === 'permission-denied') {
+      semAcesso = true; renderSync();
+      if (ped) { clearTimeout(salvarT); ped = null; location.hash = '#/pedidos'; }
+    } else toast('Não foi possível carregar os pedidos. Confira a internet e recarregue a página.');
+    renderLista();
   }));
   ouvintes.push(base.collection('cfg').doc('app').onSnapshot(cfgRemota, () => {}));
 }
